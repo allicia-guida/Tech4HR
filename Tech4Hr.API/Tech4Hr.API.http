@@ -1,0 +1,6 @@
+@Tech4Hr.API_HostAddress = http://localhost:5287
+
+GET {{Tech4Hr.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
