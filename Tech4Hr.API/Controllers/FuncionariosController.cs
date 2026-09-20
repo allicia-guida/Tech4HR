@@ -102,4 +102,33 @@ public class FuncionariosController : ControllerBase
             funcionario.Ativo
         });
     }
+
+    [HttpGet]
+public async Task<IActionResult> Listar()
+{
+    // Temporário: restringe a consulta ao ambiente de desenvolvimento.
+    if (!_environment.IsDevelopment())
+    {
+        return NotFound();
+    }
+
+    var funcionarios = await _context.Funcionarios
+        .AsNoTracking()
+        .OrderBy(f => f.Nome)
+        .ThenBy(f => f.Sobrenome)
+        .Select(f => new
+        {
+            f.IdFuncionario,
+            f.Nome,
+            f.Sobrenome,
+            f.EmailCorporativo,
+            f.CPF,
+            f.DataAdmissao,
+            f.Ativo
+        })
+        .ToListAsync();
+
+    return Ok(funcionarios);
+}
+
 }
