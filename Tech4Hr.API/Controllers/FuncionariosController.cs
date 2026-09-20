@@ -129,6 +129,7 @@ public class FuncionariosController : ControllerBase
     return Ok(funcionarios);
 }
 
+[Authorize(Roles = "ADMIN,OPERACIONAL")]
 [HttpGet("{id:int}")]
 public async Task<IActionResult> BuscarPorId(int id)
 {
