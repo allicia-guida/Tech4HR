@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Tech4Hr.API.Data;
 using Tech4Hr.API.DTOs;
 using Tech4Hr.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Tech4Hr.API.Controllers;
 
@@ -103,14 +104,11 @@ public class FuncionariosController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "ADMIN,OPERACIONAL")]
     [HttpGet]
-public async Task<IActionResult> Listar()
-{
-    // Temporário: restringe a consulta ao ambiente de desenvolvimento.
-    if (!_environment.IsDevelopment())
+    public async Task<IActionResult> Listar()
     {
-        return NotFound();
-    }
+    // Temporário: restringe a consulta ao ambiente de desenvolvimento.
 
     var funcionarios = await _context.Funcionarios
         .AsNoTracking()
