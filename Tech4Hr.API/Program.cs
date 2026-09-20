@@ -88,7 +88,27 @@ builder.Services
     });
 
 // Autorização
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UsuarioPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("tipo_conta", "USUARIO");
+    });
+
+    options.AddPolicy("FuncionarioPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("tipo_conta", "FUNCIONARIO");
+    });
+
+    options.AddPolicy("AdminPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("tipo_conta", "USUARIO");
+        policy.RequireRole("ADMIN");
+    });
+});
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

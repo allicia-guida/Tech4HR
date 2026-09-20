@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -5,34 +6,29 @@ using Microsoft.EntityFrameworkCore;
 using Tech4Hr.API.Data;
 using Tech4Hr.API.DTOs;
 using Tech4Hr.API.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Tech4Hr.API.Controllers;
 
 [ApiController]
 [Route("api/funcionarios")]
+[Authorize]
 public class FuncionariosController : ControllerBase
 {
     private readonly Tech4HrDbContext _context;
-    private readonly IWebHostEnvironment _environment;
 
-    public FuncionariosController(
-        Tech4HrDbContext context,
-        IWebHostEnvironment environment)
+    public FuncionariosController(Tech4HrDbContext context)
     {
         _context = context;
-        _environment = environment;
     }
 
+    [Authorize(Roles = "ADMIN,OPERACIONAL")]
     [HttpPost]
     public async Task<IActionResult> Cadastrar(
         [FromBody] CadastrarFuncionarioDto dto)
     {
-        // Temporário: cadastro liberado apenas no ambiente local
-        // até implementarmos autenticação e autorização.
-        if (!_environment.IsDevelopment())
+        if (!ModelState.IsValid)
         {
-            return NotFound();
+            return ValidationProblem(ModelState);
         }
 
         string nome = dto.Nome.Trim();
@@ -73,11 +69,7 @@ public class FuncionariosController : ControllerBase
         };
 
         var passwordHasher = new PasswordHasher<Funcionario>();
-
-        funcionario.SenhaHash = passwordHasher.HashPassword(
-            funcionario,
-            dto.Senha
-        );
+        funcionario.SenhaHash = passwordHasher.HashPassword(funcionario, dto.Senha);
 
         _context.Funcionarios.Add(funcionario);
 
@@ -108,147 +100,168 @@ public class FuncionariosController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Listar()
     {
-    // Temporário: restringe a consulta ao ambiente de desenvolvimento.
+        var funcionarios = await _context.Funcionarios
+            .AsNoTracking()
+            .OrderBy(f => f.Nome)
+            .ThenBy(f => f.Sobrenome)
+            .Select(f => new
+            {
+                f.IdFuncionario,
+                f.Nome,
+                f.Sobrenome,
+                f.EmailCorporativo,
+                f.CPF,
+                f.DataAdmissao,
+                f.Ativo
+            })
+            .ToListAsync();
 
-    var funcionarios = await _context.Funcionarios
-        .AsNoTracking()
-        .OrderBy(f => f.Nome)
-        .ThenBy(f => f.Sobrenome)
-        .Select(f => new
+        return Ok(funcionarios);
+    }
+
+    [Authorize(Roles = "ADMIN,OPERACIONAL")]
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> BuscarPorId(int id)
+    {
+        if (id <= 0)
         {
-            f.IdFuncionario,
-            f.Nome,
-            f.Sobrenome,
-            f.EmailCorporativo,
-            f.CPF,
-            f.DataAdmissao,
-            f.Ativo
-        })
-        .ToListAsync();
+            return BadRequest("O ID deve ser maior que zero.");
+        }
 
-    return Ok(funcionarios);
-}
+        var funcionario = await _context.Funcionarios
+            .AsNoTracking()
+            .Where(f => f.IdFuncionario == id)
+            .Select(f => new
+            {
+                f.IdFuncionario,
+                f.Nome,
+                f.Sobrenome,
+                f.EmailCorporativo,
+                f.CPF,
+                f.DataAdmissao,
+                f.Ativo
+            })
+            .FirstOrDefaultAsync();
 
-[Authorize(Roles = "ADMIN,OPERACIONAL")]
-[HttpGet("{id:int}")]
-public async Task<IActionResult> BuscarPorId(int id)
-{
-    // Temporário: até implementarmos autenticação e autorização.
-    if (!_environment.IsDevelopment())
-    {
-        return NotFound();
-    }
-
-    if (id <= 0)
-    {
-        return BadRequest("O ID deve ser maior que zero.");
-    }
-
-    var funcionario = await _context.Funcionarios
-        .AsNoTracking()
-        .Where(f => f.IdFuncionario == id)
-        .Select(f => new
+        if (funcionario == null)
         {
-            f.IdFuncionario,
-            f.Nome,
-            f.Sobrenome,
-            f.EmailCorporativo,
-            f.CPF,
-            f.DataAdmissao,
-            f.Ativo
-        })
-        .FirstOrDefaultAsync();
+            return NotFound("Funcionário não encontrado.");
+        }
 
-    if (funcionario == null)
-    {
-        return NotFound("Funcionário não encontrado.");
+        return Ok(funcionario);
     }
 
-    return Ok(funcionario);
-}
-
-[HttpPut("{id:int}")]
-public async Task<IActionResult> Editar(
-    int id,
-    [FromBody] EditarFuncionarioDto dto)
-{
-    // Temporário: até implementarmos autenticação e autorização.
-    if (!_environment.IsDevelopment())
+    [Authorize(Roles = "ADMIN,OPERACIONAL")]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Editar(
+        int id,
+        [FromBody] EditarFuncionarioDto dto)
     {
-        return NotFound();
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        if (id <= 0)
+        {
+            return BadRequest("O ID deve ser maior que zero.");
+        }
+
+        var funcionario = await _context.Funcionarios
+            .FirstOrDefaultAsync(f => f.IdFuncionario == id);
+
+        if (funcionario == null)
+        {
+            return NotFound("Funcionário não encontrado.");
+        }
+
+        string nome = dto.Nome.Trim();
+        string sobrenome = dto.Sobrenome.Trim();
+        string email = dto.EmailCorporativo.Trim().ToLowerInvariant();
+        string cpf = dto.CPF.Trim();
+
+        if (string.IsNullOrWhiteSpace(nome) ||
+            string.IsNullOrWhiteSpace(sobrenome))
+        {
+            return BadRequest("Nome e sobrenome são obrigatórios.");
+        }
+
+        bool emailExiste = await _context.Funcionarios
+            .AnyAsync(f =>
+                f.EmailCorporativo == email &&
+                f.IdFuncionario != id);
+
+        if (emailExiste)
+        {
+            return Conflict("Este e-mail já está cadastrado.");
+        }
+
+        bool cpfExiste = await _context.Funcionarios
+            .AnyAsync(f =>
+                f.CPF == cpf &&
+                f.IdFuncionario != id);
+
+        if (cpfExiste)
+        {
+            return Conflict("Este CPF já está cadastrado.");
+        }
+
+        funcionario.Nome = nome;
+        funcionario.Sobrenome = sobrenome;
+        funcionario.EmailCorporativo = email;
+        funcionario.CPF = cpf;
+        funcionario.DataAdmissao = dto.DataAdmissao!.Value;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is SqlException sqlEx &&
+                  (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+        {
+            return Conflict("E-mail ou CPF já cadastrado.");
+        }
+
+        return Ok(new
+        {
+            funcionario.IdFuncionario,
+            funcionario.Nome,
+            funcionario.Sobrenome,
+            funcionario.EmailCorporativo,
+            funcionario.CPF,
+            funcionario.DataAdmissao,
+            funcionario.Ativo
+        });
     }
 
-    if (id <= 0)
+    [Authorize(Roles = "ADMIN")]
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> AlterarStatus(int id, [FromBody] AlterarFuncionarioStatusDto dto)
     {
-        return BadRequest("O ID deve ser maior que zero.");
-    }
+        if (id <= 0)
+        {
+            return BadRequest("O ID deve ser maior que zero.");
+        }
 
-    var funcionario = await _context.Funcionarios
-        .FirstOrDefaultAsync(f => f.IdFuncionario == id);
+        var funcionario = await _context.Funcionarios
+            .FirstOrDefaultAsync(f => f.IdFuncionario == id);
 
-    if (funcionario == null)
-    {
-        return NotFound("Funcionário não encontrado.");
-    }
+        if (funcionario == null)
+        {
+            return NotFound("Funcionário não encontrado.");
+        }
 
-    string nome = dto.Nome.Trim();
-    string sobrenome = dto.Sobrenome.Trim();
-    string email = dto.EmailCorporativo.Trim().ToLowerInvariant();
-    string cpf = dto.CPF.Trim();
+        funcionario.Ativo = dto.Ativo;
 
-    if (string.IsNullOrWhiteSpace(nome) ||
-        string.IsNullOrWhiteSpace(sobrenome))
-    {
-        return BadRequest("Nome e sobrenome são obrigatórios.");
-    }
-
-    bool emailExiste = await _context.Funcionarios
-        .AnyAsync(f =>
-            f.EmailCorporativo == email &&
-            f.IdFuncionario != id);
-
-    if (emailExiste)
-    {
-        return Conflict("Este e-mail já está cadastrado.");
-    }
-
-    bool cpfExiste = await _context.Funcionarios
-        .AnyAsync(f =>
-            f.CPF == cpf &&
-            f.IdFuncionario != id);
-
-    if (cpfExiste)
-    {
-        return Conflict("Este CPF já está cadastrado.");
-    }
-
-    funcionario.Nome = nome;
-    funcionario.Sobrenome = sobrenome;
-    funcionario.EmailCorporativo = email;
-    funcionario.CPF = cpf;
-    funcionario.DataAdmissao = dto.DataAdmissao!.Value;
-
-    try
-    {
         await _context.SaveChangesAsync();
-    }
-    catch (DbUpdateException ex)
-        when (ex.InnerException is SqlException sqlEx &&
-              (sqlEx.Number == 2601 || sqlEx.Number == 2627))
-    {
-        return Conflict("E-mail ou CPF já cadastrado.");
-    }
 
-    return Ok(new
-    {
-        funcionario.IdFuncionario,
-        funcionario.Nome,
-        funcionario.Sobrenome,
-        funcionario.EmailCorporativo,
-        funcionario.CPF,
-        funcionario.DataAdmissao,
-        funcionario.Ativo
-    });
-}
-
+        return Ok(new
+        {
+            funcionario.IdFuncionario,
+            funcionario.Nome,
+            funcionario.Sobrenome,
+            funcionario.Ativo
+        });
+    }
 }

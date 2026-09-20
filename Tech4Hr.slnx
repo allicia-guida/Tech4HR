@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Tech4Hr.API/Tech4Hr.API.csproj" />
+  <Project Path="Tech4Hr.Tests/Tech4Hr.Tests.csproj" />
 </Solution>
