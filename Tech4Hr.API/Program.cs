@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tech4Hr.API.Configurations;
 using Tech4Hr.API.Data;
+using Tech4Hr.API.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +94,93 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Inicialização manual do primeiro administrador.
+// Execute somente em um ambiente local e controlado.
+if (args.Contains("--criar-admin-inicial"))
+{
+    if (!app.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException(
+            "A inicializacao do ADMIN so pode ser executada em Development.");
+    }
+
+    using var scope = app.Services.CreateScope();
+
+    var context = scope.ServiceProvider
+        .GetRequiredService<Tech4HrDbContext>();
+
+    // Não iniciar o processo se já existir um ADMIN.
+    if (await context.Usuarios.AnyAsync(u => u.NivelUsuario == "ADMIN"))
+    {
+        Console.WriteLine("Ja existe um ADMIN cadastrado.");
+        return;
+    }
+
+    Console.Write("Nome: ");
+    string nome = Console.ReadLine() ?? "";
+
+    Console.Write("Sobrenome: ");
+    string sobrenome = Console.ReadLine() ?? "";
+
+    Console.Write("E-mail: ");
+    string email = Console.ReadLine() ?? "";
+
+    Console.Write("Senha (nao sera exibida): ");
+
+    var senha = new StringBuilder();
+
+    while (true)
+    {
+        var tecla = Console.ReadKey(intercept: true);
+
+        if (tecla.Key == ConsoleKey.Enter)
+        {
+            Console.WriteLine();
+            break;
+        }
+
+        if (tecla.Key == ConsoleKey.Backspace)
+        {
+            if (senha.Length > 0)
+            {
+                senha.Length--;
+            }
+
+            continue;
+        }
+
+        if (tecla.KeyChar != '\0')
+        {
+            senha.Append(tecla.KeyChar);
+        }
+    }
+
+    try
+    {
+        await CriarAdminInicial.ExecutarAsync(
+            context,
+            nome,
+            sobrenome,
+            email,
+            senha.ToString()
+        );
+
+        Console.WriteLine("Administrador inicial criado com sucesso!");
+    }
+    catch (Exception ex) when (
+        ex is ArgumentException ||
+        ex is InvalidOperationException)
+    {
+        Console.WriteLine($"Nao foi possivel criar o ADMIN: {ex.Message}");
+    }
+    finally
+    {
+        senha.Clear();
+    }
+
+    return;
+}
 
 if (app.Environment.IsDevelopment())
 {
