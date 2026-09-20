@@ -168,4 +168,88 @@ public async Task<IActionResult> BuscarPorId(int id)
     return Ok(funcionario);
 }
 
+[HttpPut("{id:int}")]
+public async Task<IActionResult> Editar(
+    int id,
+    [FromBody] EditarFuncionarioDto dto)
+{
+    // Temporário: até implementarmos autenticação e autorização.
+    if (!_environment.IsDevelopment())
+    {
+        return NotFound();
+    }
+
+    if (id <= 0)
+    {
+        return BadRequest("O ID deve ser maior que zero.");
+    }
+
+    var funcionario = await _context.Funcionarios
+        .FirstOrDefaultAsync(f => f.IdFuncionario == id);
+
+    if (funcionario == null)
+    {
+        return NotFound("Funcionário não encontrado.");
+    }
+
+    string nome = dto.Nome.Trim();
+    string sobrenome = dto.Sobrenome.Trim();
+    string email = dto.EmailCorporativo.Trim().ToLowerInvariant();
+    string cpf = dto.CPF.Trim();
+
+    if (string.IsNullOrWhiteSpace(nome) ||
+        string.IsNullOrWhiteSpace(sobrenome))
+    {
+        return BadRequest("Nome e sobrenome são obrigatórios.");
+    }
+
+    bool emailExiste = await _context.Funcionarios
+        .AnyAsync(f =>
+            f.EmailCorporativo == email &&
+            f.IdFuncionario != id);
+
+    if (emailExiste)
+    {
+        return Conflict("Este e-mail já está cadastrado.");
+    }
+
+    bool cpfExiste = await _context.Funcionarios
+        .AnyAsync(f =>
+            f.CPF == cpf &&
+            f.IdFuncionario != id);
+
+    if (cpfExiste)
+    {
+        return Conflict("Este CPF já está cadastrado.");
+    }
+
+    funcionario.Nome = nome;
+    funcionario.Sobrenome = sobrenome;
+    funcionario.EmailCorporativo = email;
+    funcionario.CPF = cpf;
+    funcionario.DataAdmissao = dto.DataAdmissao!.Value;
+
+    try
+    {
+        await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateException ex)
+        when (ex.InnerException is SqlException sqlEx &&
+              (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+    {
+        return Conflict("E-mail ou CPF já cadastrado.");
+    }
+
+    return Ok(new
+    {
+        funcionario.IdFuncionario,
+        funcionario.Nome,
+        funcionario.Sobrenome,
+        funcionario.EmailCorporativo,
+        funcionario.CPF,
+        funcionario.DataAdmissao,
+        funcionario.Ativo
+    });
+}
+
 }
