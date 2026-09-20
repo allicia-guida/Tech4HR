@@ -131,4 +131,41 @@ public async Task<IActionResult> Listar()
     return Ok(funcionarios);
 }
 
+[HttpGet("{id:int}")]
+public async Task<IActionResult> BuscarPorId(int id)
+{
+    // Temporário: até implementarmos autenticação e autorização.
+    if (!_environment.IsDevelopment())
+    {
+        return NotFound();
+    }
+
+    if (id <= 0)
+    {
+        return BadRequest("O ID deve ser maior que zero.");
+    }
+
+    var funcionario = await _context.Funcionarios
+        .AsNoTracking()
+        .Where(f => f.IdFuncionario == id)
+        .Select(f => new
+        {
+            f.IdFuncionario,
+            f.Nome,
+            f.Sobrenome,
+            f.EmailCorporativo,
+            f.CPF,
+            f.DataAdmissao,
+            f.Ativo
+        })
+        .FirstOrDefaultAsync();
+
+    if (funcionario == null)
+    {
+        return NotFound("Funcionário não encontrado.");
+    }
+
+    return Ok(funcionario);
+}
+
 }
