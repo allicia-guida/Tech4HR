@@ -1,0 +1,38 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://tech4hr-api-public.onrender.com"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "ios-simulator": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://tech4hr-api-public.onrender.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

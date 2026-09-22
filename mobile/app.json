@@ -1,0 +1,92 @@
+{
+  "expo": {
+    "name": "Tech4HR",
+    "slug": "tech4hr-mobile",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/tech4hr-icon.png",
+    "scheme": "tech4hr",
+    "platforms": ["android", "ios"],
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "icon": "./assets/images/tech4hr-icon.png",
+      "bundleIdentifier": "br.com.tech4hr.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#071E5C",
+        "foregroundImage": "./assets/images/tech4hr-mark.png",
+        "monochromeImage": "./assets/images/tech4hr-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true,
+      "package": "br.com.tech4hr.mobile",
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#146EF5",
+          "image": "./assets/images/tech4hr-mark.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#111820",
+            "image": "./assets/images/tech4hr-mark.png"
+          }
+        }
+      ],
+      "expo-secure-store",
+      "expo-sharing",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permita que o Tech4HR use o Face ID para proteger o acesso ao aplicativo."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/tech4hr-monochrome.png",
+          "color": "#146EF5"
+        }
+      ],
+      "expo-document-picker",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Permita que o Tech4HR acesse sua localização durante o registro de ponto."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita que o Tech4HR selecione uma foto de perfil ou um anexo.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1a355f95-9731-4ca3-9dc1-6011419b3e8c"
+      }
+    },
+    "owner": "matheusmestriner"
+  }
+}
