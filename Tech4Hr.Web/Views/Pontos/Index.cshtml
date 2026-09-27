@@ -33,7 +33,8 @@
         <form asp-controller="Pontos"
               asp-action="Index"
               method="get"
-              class="points-filter-form">
+              class="points-filter-form"
+              id="form-filtros-pontos">
 
             <div class="filter-field">
                 <label for="idFuncionario">Funcionário</label>
@@ -67,7 +68,7 @@
                        value="@(Model.DataFim.HasValue ? Model.DataFim.Value.ToString("yyyy-MM-dd") : string.Empty)" />
             </div>
 
-            <div class="filter-actions">
+            <div class="filter-actions filter-actions-bottom">
                 <button type="submit"
                         class="btn-primary">
                     Filtrar
@@ -75,24 +76,31 @@
 
                 <a asp-controller="Pontos"
                    asp-action="Index"
-                   class="btn-secondary">
+                   class="btn-secondary btn-limpar-filtros">
                     Limpar filtros
                 </a>
+            </div>
 
+        </form>
+
+        <div class="points-toolbar-bottom">
+
+            <div class="filter-actions">
                 <button type="submit"
-                        class="btn-secondary"
+                        class="btn-secondary btn-export-xml"
+                        form="form-filtros-pontos"
                         formaction="@Url.Action("ExportarXml", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
                     Exportar XML
                 </button>
 
                 <button type="submit"
-                        class="btn-secondary"
+                        class="btn-secondary btn-export-xlsx"
+                        form="form-filtros-pontos"
                         formaction="@Url.Action("ExportarXlsx", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
                     Exportar XLSX
                 </button>
             </div>
-
-        </form>
+        </div>
     </div>
 
     <div class="table-card">

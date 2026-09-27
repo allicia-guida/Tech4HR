@@ -461,6 +461,14 @@ h2 {
     text-transform: uppercase;
 }
 
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .topbar-profile {
     padding: 8px 14px;
 
@@ -471,6 +479,101 @@ h2 {
 
     font-size: 13px;
     font-weight: bold;
+}
+
+.topbar-access-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #e4edf9;
+    border-radius: 999px;
+    background: #f8fbff;
+    color: #12385f;
+    font-weight: 700;
+    font-size: 0.9rem;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.topbar-access-btn:hover {
+    background: #eef5ff;
+    border-color: #d7e5f8;
+    text-decoration: none;
+}
+
+body.accessibility-daltonic {
+    background: #f5f2eb;
+    color: #1d1d1d;
+}
+
+body.accessibility-daltonic .sidebar {
+    background: #2b2b2b;
+}
+
+body.accessibility-daltonic .topbar,
+body.accessibility-daltonic .points-filter-card,
+body.accessibility-daltonic .table-card,
+body.accessibility-daltonic .employee-points-section,
+body.accessibility-daltonic .clock-card,
+body.accessibility-daltonic .funcionario-header {
+    background: #fffdf8;
+    border-color: #d6c7b1;
+    color: #1d1d1d;
+    box-shadow: 0 8px 24px rgba(44, 35, 22, 0.08);
+}
+
+body.accessibility-daltonic .topbar-access-btn {
+    background: #f7f0e4;
+    border-color: #d8c29d;
+    color: #2d2518;
+}
+
+body.accessibility-daltonic .btn-primary {
+    background: #0d4ea8;
+    border-color: #0b3f8d;
+    color: #fff;
+}
+
+body.accessibility-daltonic .btn-limpar-filtros {
+    background: linear-gradient(135deg, #d4871d, #b96e0a);
+    border-color: #905100;
+    color: #fff;
+}
+
+body.accessibility-daltonic .btn-export-xml {
+    background: linear-gradient(135deg, #d4b347, #b58a18);
+    border-color: #8d6a0d;
+    color: #1a1200;
+}
+
+body.accessibility-daltonic .btn-export-xlsx {
+    background: linear-gradient(135deg, #2aa86e, #1d7d4c);
+    border-color: #155d3b;
+    color: #fff;
+}
+
+body.accessibility-daltonic .data-table th {
+    background-color: #2a3946;
+    color: #f7f8fb;
+}
+
+body.accessibility-daltonic .menu-item.active,
+body.accessibility-daltonic .menu-item:hover {
+    background-color: #4b7f91;
+}
+
+body.accessibility-daltonic .field-group label,
+body.accessibility-daltonic .filter-field label,
+body.accessibility-daltonic .page-header p,
+body.accessibility-daltonic .usuario-greeting,
+body.accessibility-daltonic .clock-label,
+body.accessibility-daltonic .modal-label {
+    color: #2d2d2d;
 }
 
 .content-area {
@@ -776,6 +879,88 @@ h2 {
     border-radius: 6px;
 }
 
+body.accessibility-daltonic {
+    background: #f3efe9;
+    color: #1d1d1d;
+}
+
+body.accessibility-daltonic .sidebar {
+    background: #1f2a37;
+}
+
+body.accessibility-daltonic .topbar,
+body.accessibility-daltonic .points-filter-card,
+body.accessibility-daltonic .table-card,
+body.accessibility-daltonic .employee-points-section,
+body.accessibility-daltonic .clock-card,
+body.accessibility-daltonic .funcionario-header {
+    background: #fffdf9;
+    border-color: #c7b59d;
+    color: #1d1d1d;
+    box-shadow: 0 8px 24px rgba(44, 35, 22, 0.12);
+}
+
+body.accessibility-daltonic .sidebar-menu .menu-item,
+body.accessibility-daltonic .sidebar-user .btn-logout,
+body.accessibility-daltonic .topbar-access-btn,
+body.accessibility-daltonic .btn-secondary,
+body.accessibility-daltonic .btn-primary,
+body.accessibility-daltonic .btn-registro,
+body.accessibility-daltonic .btn-historico,
+body.accessibility-daltonic .btn-login-submit {
+    border-radius: 10px;
+    filter: contrast(1.1);
+}
+
+body.accessibility-daltonic .btn-primary {
+    background: #0b5ed7;
+    border-color: #0844a3;
+    color: #fff;
+}
+
+body.accessibility-daltonic .btn-limpar-filtros {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    border-color: #92400e;
+    color: #fff;
+}
+
+body.accessibility-daltonic .btn-export-xml {
+    background: linear-gradient(135deg, #d4a625, #b7791f);
+    border-color: #7c4e00;
+    color: #1a1200;
+}
+
+body.accessibility-daltonic .btn-export-xlsx {
+    background: linear-gradient(135deg, #2ea363, #1d7a45);
+    border-color: #195c37;
+    color: #fff;
+}
+
+body.accessibility-daltonic .data-table th {
+    background-color: #2a3a46;
+    color: #f8f8f8;
+}
+
+body.accessibility-daltonic .field-group label,
+body.accessibility-daltonic .filter-field label,
+body.accessibility-daltonic .modal-label,
+body.accessibility-daltonic .page-header p,
+body.accessibility-daltonic .clock-label,
+body.accessibility-daltonic .registro-item span,
+body.accessibility-daltonic .usuario-greeting {
+    color: #2a2a2a;
+}
+
+body.accessibility-daltonic .auth-form input,
+body.accessibility-daltonic .filter-field select,
+body.accessibility-daltonic .filter-field input,
+body.accessibility-daltonic .search-input,
+body.accessibility-daltonic .field-group input {
+    border-color: #8a7d66;
+    background-color: #fffefc;
+    color: #1d1d1d;
+}
+
 /* ==============================
    FILTROS E PONTOS
    ============================== */
@@ -792,9 +977,25 @@ h2 {
     box-shadow: 0 8px 24px rgba(13, 58, 110, 0.07);
 }
 
+.points-toolbar-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #edf3fb;
+}
+
+.toolbar-title {
+    color: #12385f;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
 .points-filter-form {
     display: grid;
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: end;
     gap: 16px;
 }
@@ -833,33 +1034,99 @@ h2 {
 
 .filter-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
+    width: 100%;
+    min-height: 42px;
+}
+
+.filter-actions > * {
+    flex: 0 0 auto;
+}
+
+.filter-actions-bottom {
+    justify-content: flex-start;
+    align-self: end;
+    width: auto;
 }
 
 .btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
+    min-height: 42px;
     padding: 10px 16px;
-
     background-color: #eef4fb;
     color: #12385f;
-
     border: 1px solid #d7e7f7;
-    border-radius: 6px;
-
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: bold;
-
-    transition: 0.2s;
+    font-weight: 700;
+    font-size: 0.92rem;
+    line-height: 1.2;
+    box-shadow: 0 2px 8px rgba(18, 56, 95, 0.08);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .btn-secondary:hover {
     background-color: #e3edf9;
     color: #0d2d52;
     text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(18, 56, 95, 0.12);
+}
+
+.btn-limpar-filtros {
+    background: linear-gradient(135deg, #f7b84c, #ee8a00);
+    border-color: #d87700;
+    color: #fff;
+}
+
+.btn-limpar-filtros:hover {
+    background: linear-gradient(135deg, #f0b040, #db7d00);
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-export-xml {
+    background: linear-gradient(135deg, #f9e27d, #f0c94a);
+    border-color: #d7a92d;
+    color: #4a3600;
+}
+
+.btn-export-xml:hover {
+    background: linear-gradient(135deg, #f5d96d, #e7b92b);
+    color: #312400;
+    text-decoration: none;
+}
+
+.btn-export-xlsx {
+    background: linear-gradient(135deg, #4ccf87, #1f9d55);
+    border-color: #1d8748;
+    color: #fff;
+}
+
+.btn-export-xlsx:hover {
+    background: linear-gradient(135deg, #3ec47d, #1a864a);
+    color: #fff;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .points-filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .filter-actions > * {
+        width: 100%;
+    }
 }
 
 .employee-points-section {
@@ -1225,7 +1492,21 @@ h2 {
         padding: 18px 20px;
     }
 
-    .points-filter-form {
+    .topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .page-header,
+    .employee-details-header,
+    .funcionario-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .points-filter-form,
+    .filter-form,
+    .history-form {
         grid-template-columns: 1fr;
     }
 
@@ -1290,7 +1571,16 @@ h2 {
     }
 
     .topbar {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
         padding: 16px 18px;
+    }
+
+    .topbar-actions {
+        width: 100%;
+        justify-content: space-between;
     }
 
     .topbar-profile {
@@ -1324,7 +1614,9 @@ h2 {
     }
 
     .button-secondary.compact,
-    .history-submit {
+    .history-submit,
+    .btn-historico,
+    .btn-registro {
         width: 100%;
     }
 
@@ -1336,6 +1628,35 @@ h2 {
 
     .clock-card {
         padding: 16px 14px 18px;
+    }
+}
+
+@media (max-width: 420px) {
+    body {
+        padding: 10px;
+    }
+
+    .auth-card,
+    .user-form-card,
+    .funcionario-form-card,
+    .table-card,
+    .filters-card,
+    .employee-points-section,
+    .clock-card {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .topbar h1 {
+        font-size: 1.5rem;
+    }
+
+    .auth-card h2 {
+        font-size: 1.7rem;
+    }
+
+    .login-switch {
+        grid-template-columns: 1fr;
     }
 }
 
