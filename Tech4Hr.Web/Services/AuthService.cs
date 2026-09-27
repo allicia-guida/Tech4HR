@@ -114,4 +114,96 @@ public class AuthService : IAuthService
             return AuthLoginResult.Failure("Ocorreu um erro ao tentar autenticar o usuário.");
         }
     }
+
+    public async Task<FuncionarioAuthLoginResult> LoginFuncionarioAsync(
+        LoginViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            return FuncionarioAuthLoginResult.Failure("Informe o e-mail corporativo.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Senha))
+        {
+            return FuncionarioAuthLoginResult.Failure("Informe a senha.");
+        }
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("Tech4HrApi");
+
+            var response = await client.PostAsJsonAsync(
+                "api/auth/login-funcionario",
+                new FuncionarioAuthLoginRequest
+                {
+                    EmailCorporativo = model.Email.Trim(),
+                    Senha = model.Senha
+                },
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return FuncionarioAuthLoginResult.Failure("E-mail ou senha inválidos.");
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                return FuncionarioAuthLoginResult.Failure(
+                    string.IsNullOrWhiteSpace(errorContent)
+                        ? "Falha na autenticação do funcionário."
+                        : errorContent);
+            }
+
+            var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(payload))
+            {
+                return FuncionarioAuthLoginResult.Failure("Resposta vazia da API durante o login do funcionário.");
+            }
+
+            var authResponse = JsonSerializer.Deserialize<FuncionarioAuthApiLoginResponse>(payload, JsonOptions);
+
+            if (authResponse is null || string.IsNullOrWhiteSpace(authResponse.Token) || authResponse.Funcionario is null)
+            {
+                return FuncionarioAuthLoginResult.Failure("Resposta de autenticação inválida da API.");
+            }
+
+            var funcionario = authResponse.Funcionario;
+
+            var user = new FuncionarioAuthenticatedUser
+            {
+                IdFuncionario = funcionario.IdFuncionario,
+                Nome = funcionario.Nome,
+                Sobrenome = funcionario.Sobrenome,
+                EmailCorporativo = funcionario.EmailCorporativo,
+                Ativo = funcionario.Ativo
+            };
+
+            return FuncionarioAuthLoginResult.Success(
+                authResponse.Token,
+                authResponse.Tipo,
+                authResponse.ExpiraEm,
+                user);
+        }
+        catch (HttpRequestException)
+        {
+            return FuncionarioAuthLoginResult.Failure("Não foi possível conectar com a API de autenticação do funcionário.");
+        }
+        catch (TaskCanceledException)
+        {
+            return FuncionarioAuthLoginResult.Failure("Tempo limite da autenticação excedido.");
+        }
+        catch (JsonException)
+        {
+            return FuncionarioAuthLoginResult.Failure("Resposta da API em formato inválido.");
+        }
+        catch (Exception)
+        {
+            return FuncionarioAuthLoginResult.Failure("Ocorreu um erro ao tentar autenticar o funcionário.");
+        }
+    }
 }

@@ -45,9 +45,15 @@ public class AuthController : Controller
             return View(model);
         }
 
+        HttpContext.Session.Clear();
+
         HttpContext.Session.SetString(
             "AuthToken",
             resultado.Token);
+
+        HttpContext.Session.SetString(
+            "TipoConta",
+            resultado.User.NivelUsuario);
 
         HttpContext.Session.SetString(
             "UsuarioNome",
@@ -66,6 +72,57 @@ public class AuthController : Controller
             resultado.User.IdUsuario);
 
         return RedirectToAction("Index", "Dashboard");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LoginFuncionario(
+        LoginViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("Login", model);
+        }
+
+        var resultado = await _authService.LoginFuncionarioAsync(
+            model,
+            cancellationToken);
+
+        if (!resultado.IsSuccess ||
+            resultado.User is null ||
+            string.IsNullOrWhiteSpace(resultado.Token))
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                resultado.ErrorMessage ?? "Não foi possível realizar o login do funcionário.");
+
+            return View("Login", model);
+        }
+
+        HttpContext.Session.Clear();
+
+        HttpContext.Session.SetString(
+            "FuncionarioAuthToken",
+            resultado.Token);
+
+        HttpContext.Session.SetString(
+            "TipoConta",
+            "FUNCIONARIO");
+
+        HttpContext.Session.SetInt32(
+            "FuncionarioId",
+            resultado.User.IdFuncionario);
+
+        HttpContext.Session.SetString(
+            "FuncionarioNome",
+            $"{resultado.User.Nome} {resultado.User.Sobrenome}".Trim());
+
+        HttpContext.Session.SetString(
+            "FuncionarioEmail",
+            resultado.User.EmailCorporativo);
+
+        return RedirectToAction("Index", "MeuPonto");
     }
 
     [HttpPost]

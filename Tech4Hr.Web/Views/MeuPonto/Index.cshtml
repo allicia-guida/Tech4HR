@@ -1,0 +1,109 @@
+@model Tech4Hr.Web.Models.MeuPontoViewModel
+
+@{
+    ViewData["Title"] = "Meu ponto";
+    var dataHoje = Model.DataAtual.ToString("dddd, dd 'de' MMMM");
+    var registroHoje = Model.PontoHoje ?? new Tech4Hr.Web.Models.PontoApiResponse();
+}
+
+<div class="funcionario-page funcionario-clock-page">
+    <div class="clock-card">
+        <div class="clock-topbar">
+            <div class="tech-brand">Tech4Hr</div>
+            <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-inline-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="logout-inline-button">Sair</button>
+            </form>
+        </div>
+
+        <div class="clock-date">@dataHoje</div>
+        <div class="clock-time" id="clockTime">@DateTime.Now.ToString("HH:mm:ss")</div>
+        <div class="clock-label">Horário atual</div>
+
+        <form asp-controller="MeuPonto"
+              asp-action="RegistrarPonto"
+              method="post"
+              class="clock-form"
+              id="registrarPontoForm">
+            @Html.AntiForgeryToken()
+
+            <button type="submit"
+                    class="btn-registro"
+                    id="btnRegistrarPonto"
+                    disabled="@(Model.PodeRegistrarPonto ? null : "disabled")">
+                @(Model.PodeRegistrarPonto ? "REGISTRAR PONTO" : "Jornada registrada por completo hoje.")
+            </button>
+        </form>
+
+        @if (TempData["Sucesso"] is string sucesso)
+        {
+            <div class="alert success">@sucesso</div>
+        }
+
+        @if (TempData["Erro"] is string erro)
+        {
+            <div class="alert danger">@erro</div>
+        }
+
+        <div class="registro-hoje">
+            <div class="registro-hoje-header">
+                <h3>Registros de hoje</h3>
+            </div>
+
+            <div class="registro-lista">
+                <div class="registro-item @(registroHoje.Entrada.HasValue ? "ok" : "pending")">
+                    <span>Entrada</span>
+                    <strong>@(registroHoje.Entrada.HasValue ? registroHoje.Entrada.Value.ToString("HH:mm") : "--:--")</strong>
+                </div>
+                <div class="registro-item @(registroHoje.SaidaAlmoco.HasValue ? "ok" : "pending")">
+                    <span>Saída para almoço</span>
+                    <strong>@(registroHoje.SaidaAlmoco.HasValue ? registroHoje.SaidaAlmoco.Value.ToString("HH:mm") : "--:--")</strong>
+                </div>
+                <div class="registro-item @(registroHoje.EntradaAlmoco.HasValue ? "ok" : "pending")">
+                    <span>Retorno do almoço</span>
+                    <strong>@(registroHoje.EntradaAlmoco.HasValue ? registroHoje.EntradaAlmoco.Value.ToString("HH:mm") : "--:--")</strong>
+                </div>
+                <div class="registro-item @(registroHoje.Saida.HasValue ? "ok" : "pending")">
+                    <span>Saída</span>
+                    <strong>@(registroHoje.Saida.HasValue ? registroHoje.Saida.Value.ToString("HH:mm") : "--:--")</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-action">
+            <a asp-controller="MeuPonto" asp-action="Historico" class="btn-historico">Ver meu histórico</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const element = document.getElementById('clockTime');
+            if (!element) return;
+
+            const atualizarRelogio = () => {
+                const agora = new Date();
+                const hora = agora.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                element.textContent = hora;
+            };
+
+            atualizarRelogio();
+            setInterval(atualizarRelogio, 1000);
+
+            const form = document.getElementById('registrarPontoForm');
+            const button = document.getElementById('btnRegistrarPonto');
+            if (!form || !button) return;
+
+            form.addEventListener('submit', function () {
+                button.disabled = true;
+                button.textContent = 'Registrando...';
+            });
+        })();
+    </script>
+}

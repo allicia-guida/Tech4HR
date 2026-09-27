@@ -7,11 +7,14 @@ namespace Tech4Hr.Web.Controllers;
 public class FuncionariosController : Controller
 {
     private readonly IFuncionarioService _funcionarioService;
+    private readonly IPontoService _pontoService;
 
     public FuncionariosController(
-        IFuncionarioService funcionarioService)
+        IFuncionarioService funcionarioService,
+        IPontoService pontoService)
     {
         _funcionarioService = funcionarioService;
+        _pontoService = pontoService;
     }
 
     private bool UsuarioEhAdmin()
@@ -82,7 +85,21 @@ public class FuncionariosController : Controller
                 return NotFound();
             }
 
-            return View(funcionario);
+            var pontos =
+                await _pontoService.ConsultarAsync(
+                    token,
+                    id,
+                    cancellationToken: cancellationToken);
+
+            var model = new FuncionarioDetalhesViewModel
+            {
+                Funcionario = funcionario,
+                Pontos = pontos
+                    .OrderByDescending(p => p.DataPonto)
+                    .ToList()
+            };
+
+            return View(model);
         }
         catch (HttpRequestException)
         {
