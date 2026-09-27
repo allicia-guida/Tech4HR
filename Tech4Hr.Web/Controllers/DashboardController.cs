@@ -34,20 +34,30 @@ public class DashboardController : Controller
                     token,
                     cancellationToken);
 
-            var usuarios =
-                await _usuarioService.ListarAsync(
-                    token,
-                    cancellationToken);
+            var nivelUsuario = HttpContext.Session.GetString("UsuarioNivel");
+            var ehAdmin = string.Equals(
+                nivelUsuario,
+                "ADMIN",
+                StringComparison.OrdinalIgnoreCase);
 
             var model = new DashboardViewModel
             {
                 TotalFuncionarios = funcionarios.Count,
-                FuncionariosAtivos = funcionarios.Count(f => f.Ativo),
-                TotalUsuarios = usuarios.Count,
-                UsuariosAtivos = usuarios.Count(u => u.Ativo),
-                TotalAdministradores = usuarios.Count(u => u.NivelUsuario == "ADMIN"),
-                TotalOperacionais = usuarios.Count(u => u.NivelUsuario == "OPERACIONAL")
+                FuncionariosAtivos = funcionarios.Count(f => f.Ativo)
             };
+
+            if (ehAdmin)
+            {
+                var usuarios =
+                    await _usuarioService.ListarAsync(
+                        token,
+                        cancellationToken);
+
+                model.TotalUsuarios = usuarios.Count;
+                model.UsuariosAtivos = usuarios.Count(u => u.Ativo);
+                model.TotalAdministradores = usuarios.Count(u => u.NivelUsuario == "ADMIN");
+                model.TotalOperacionais = usuarios.Count(u => u.NivelUsuario == "OPERACIONAL");
+            }
 
             return View(model);
         }

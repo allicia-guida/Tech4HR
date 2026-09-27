@@ -78,6 +78,18 @@
                    class="btn-secondary">
                     Limpar filtros
                 </a>
+
+                <button type="submit"
+                        class="btn-secondary"
+                        formaction="@Url.Action("ExportarXml", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
+                    Exportar XML
+                </button>
+
+                <button type="submit"
+                        class="btn-secondary"
+                        formaction="@Url.Action("ExportarXlsx", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
+                    Exportar XLSX
+                </button>
             </div>
 
         </form>

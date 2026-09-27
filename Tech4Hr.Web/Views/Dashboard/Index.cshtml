@@ -2,6 +2,10 @@
 
 @{
     ViewData["Title"] = "Dashboard";
+    var ehAdmin = string.Equals(
+        Context.Session.GetString("UsuarioNivel"),
+        "ADMIN",
+        StringComparison.OrdinalIgnoreCase);
 }
 
 <section class="page-section">
@@ -15,8 +19,8 @@
 
     <div class="page-header">
         <div>
-            <h2>Visão geral</h2>
-            <p>Resumo administrativo do sistema Tech4Hr.</p>
+            <h2>@(ehAdmin ? "Visão geral administrativa" : "Resumo operacional")</h2>
+            <p>@(ehAdmin ? "Resumo do sistema Tech4Hr." : "Dados gerais da operação e da equipe.")</p>
         </div>
     </div>
 
@@ -31,25 +35,28 @@
             <strong>@Model.FuncionariosAtivos</strong>
         </div>
 
-        <div class="detail-item">
-            <span>Total de usuários</span>
-            <strong>@Model.TotalUsuarios</strong>
-        </div>
+        @if (ehAdmin)
+        {
+            <div class="detail-item">
+                <span>Total de usuários</span>
+                <strong>@Model.TotalUsuarios</strong>
+            </div>
 
-        <div class="detail-item">
-            <span>Usuários ativos</span>
-            <strong>@Model.UsuariosAtivos</strong>
-        </div>
+            <div class="detail-item">
+                <span>Usuários ativos</span>
+                <strong>@Model.UsuariosAtivos</strong>
+            </div>
 
-        <div class="detail-item">
-            <span>Administradores</span>
-            <strong>@Model.TotalAdministradores</strong>
-        </div>
+            <div class="detail-item">
+                <span>Administradores</span>
+                <strong>@Model.TotalAdministradores</strong>
+            </div>
 
-        <div class="detail-item">
-            <span>Operacionais</span>
-            <strong>@Model.TotalOperacionais</strong>
-        </div>
+            <div class="detail-item">
+                <span>Operacionais</span>
+                <strong>@Model.TotalOperacionais</strong>
+            </div>
+        }
     </div>
 
 </section>

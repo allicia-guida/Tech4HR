@@ -139,12 +139,19 @@ h2 {
     padding: 28px;
 }
 
-.user-form {
-    display: flex;
-    flex-direction: column;
+.funcionario-form-card {
+    padding: 28px;
 }
 
-.user-form-grid {
+.user-form,
+.funcionario-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.user-form-grid,
+.funcionario-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px 20px;
@@ -154,7 +161,6 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 12px !important;
-    margin: 0 0 18px !important;
     padding: 8px 0 14px !important;
     min-height: 110px;
     border-bottom: 1px solid rgba(188, 208, 238, 0.9);
@@ -170,6 +176,21 @@ h2 {
 }
 
 .user-form-grid > .user-field label {
+    margin-bottom: 2px;
+}
+
+.funcionario-form-grid > .funcionario-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 6px 0 12px;
+}
+
+.funcionario-form-grid > .funcionario-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.funcionario-form-grid > .funcionario-field label {
     margin-bottom: 2px;
 }
 
@@ -218,14 +239,19 @@ h2 {
 .user-form-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 @media (max-width: 767px) {
-    .user-form-card {
+    .user-form-card,
+    .funcionario-form-card {
         padding: 18px 14px;
     }
 
-    .user-form-grid {
+    .user-form-grid,
+    .funcionario-form-grid {
         grid-template-columns: 1fr;
     }
 }

@@ -17,10 +17,11 @@ public class FuncionariosController : Controller
         _pontoService = pontoService;
     }
 
-    private bool UsuarioEhAdmin()
+    private bool UsuarioEhAdminOuOperacional()
     {
         var nivel = HttpContext.Session.GetString("UsuarioNivel");
-        return string.Equals(nivel, "ADMIN", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(nivel, "ADMIN", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(nivel, "OPERACIONAL", StringComparison.OrdinalIgnoreCase);
     }
 
     private bool UsuarioLogado()
@@ -120,6 +121,12 @@ public class FuncionariosController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
+        if (!UsuarioEhAdminOuOperacional())
+        {
+            TempData["Erro"] = "Acesso restrito a administradores e operacionais.";
+            return RedirectToAction("Index", "Dashboard");
+        }
+
         return View(new FuncionarioCadastroInputModel());
     }
 
@@ -136,6 +143,12 @@ public class FuncionariosController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
+        if (!UsuarioEhAdminOuOperacional())
+        {
+            TempData["Erro"] = "Acesso restrito a administradores e operacionais.";
+            return RedirectToAction("Index", "Dashboard");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -148,11 +161,29 @@ public class FuncionariosController : Controller
                 token,
                 cancellationToken);
 
+            TempData["Sucesso"] = "Funcionário cadastrado com sucesso.";
             return RedirectToAction(nameof(Index));
         }
         catch (HttpRequestException ex)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
+            var mensagem = ex.Message;
+
+            if (mensagem.Contains("E-mail", StringComparison.OrdinalIgnoreCase)
+                || mensagem.Contains("CPF", StringComparison.OrdinalIgnoreCase)
+                || mensagem.Contains("já cadastrado", StringComparison.OrdinalIgnoreCase))
+            {
+                mensagem = "Já existe um funcionário cadastrado com este e-mail ou CPF.";
+            }
+            else if (mensagem.Contains("senha", StringComparison.OrdinalIgnoreCase))
+            {
+                mensagem = "A senha informada não atende aos requisitos do sistema.";
+            }
+            else
+            {
+                mensagem = "Não foi possível cadastrar o funcionário. Verifique os dados e tente novamente.";
+            }
+
+            ModelState.AddModelError(string.Empty, mensagem);
             return View(model);
         }
     }
@@ -256,9 +287,9 @@ public class FuncionariosController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        if (!UsuarioEhAdmin())
+        if (!UsuarioEhAdminOuOperacional())
         {
-            TempData["Erro"] = "Acesso restrito a administradores.";
+            TempData["Erro"] = "Acesso restrito a administradores e operacionais.";
             return RedirectToAction("Index", "Dashboard");
         }
 
