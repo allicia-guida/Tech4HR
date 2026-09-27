@@ -1,0 +1,159 @@
+@model Tech4Hr.Web.Models.PontosConsultaViewModel
+
+@{
+    ViewData["Title"] = "Pontos registrados";
+
+    static string FormatarHorario(DateTime? horario)
+    {
+        return horario.HasValue
+            ? horario.Value.ToString("HH:mm")
+            : "-";
+    }
+}
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h2>Pontos registrados</h2>
+            <p>
+                Consulte os registros de ponto e aplique filtros por funcionário e período.
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["Erro"] is not null)
+    {
+        <div class="alert-error">
+            @TempData["Erro"]
+        </div>
+    }
+
+    <div class="points-filter-card">
+        <form asp-controller="Pontos"
+              asp-action="Index"
+              method="get"
+              class="points-filter-form"
+              id="form-filtros-pontos">
+
+            <div class="filter-field">
+                <label for="idFuncionario">Funcionário</label>
+                <select id="idFuncionario"
+                        name="idFuncionario">
+                    <option value="">Todos</option>
+
+                    @foreach (var funcionario in Model.Funcionarios)
+                    {
+                        <option value="@funcionario.IdFuncionario"
+                                selected="@(Model.IdFuncionario == funcionario.IdFuncionario ? "selected" : null)">
+                            @funcionario.NomeCompleto
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="dataInicio">Data inicial</label>
+                <input type="date"
+                       id="dataInicio"
+                       name="dataInicio"
+                       value="@(Model.DataInicio.HasValue ? Model.DataInicio.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+            </div>
+
+            <div class="filter-field">
+                <label for="dataFim">Data final</label>
+                <input type="date"
+                       id="dataFim"
+                       name="dataFim"
+                       value="@(Model.DataFim.HasValue ? Model.DataFim.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+            </div>
+
+            <div class="filter-actions filter-actions-bottom">
+                <button type="submit"
+                        class="btn-primary">
+                    Filtrar
+                </button>
+
+                <a asp-controller="Pontos"
+                   asp-action="Index"
+                   class="btn-secondary btn-limpar-filtros">
+                    Limpar filtros
+                </a>
+            </div>
+
+        </form>
+
+        <div class="points-toolbar-bottom">
+
+            <div class="filter-actions">
+                <button type="submit"
+                        class="btn-secondary btn-export-xml"
+                        form="form-filtros-pontos"
+                        formaction="@Url.Action("ExportarXml", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
+                    Exportar XML
+                </button>
+
+                <button type="submit"
+                        class="btn-secondary btn-export-xlsx"
+                        form="form-filtros-pontos"
+                        formaction="@Url.Action("ExportarXlsx", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
+                    Exportar XLSX
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-card">
+        @if (Model.Registros.Count == 0)
+        {
+            <div class="empty-state">
+                Nenhum registro de ponto encontrado.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Data</th>
+                            <th>Entrada</th>
+                            <th>Saída almoço</th>
+                            <th>Retorno almoço</th>
+                            <th>Saída</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var registro in Model.Registros)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>
+                                        @registro.Funcionario.NomeCompleto
+                                    </strong>
+                                </td>
+                                <td>
+                                    @registro.DataPonto.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @FormatarHorario(registro.Entrada)
+                                </td>
+                                <td>
+                                    @FormatarHorario(registro.SaidaAlmoco)
+                                </td>
+                                <td>
+                                    @FormatarHorario(registro.EntradaAlmoco)
+                                </td>
+                                <td>
+                                    @FormatarHorario(registro.Saida)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+</section>

@@ -1,0 +1,128 @@
+@model Tech4Hr.Web.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Login - Tech4Hr</title>
+
+    <link rel="stylesheet"
+          href="~/css/tech4hr.css"
+          asp-append-version="true" />
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-card auth-card-login">
+
+        <div class="auth-brand">Tech4Hr</div>
+
+        <h2>Bem-vindo ao Tech4Hr</h2>
+
+        <p class="auth-text">
+            Acesse sua conta para continuar.
+        </p>
+
+        <form asp-controller="Auth"
+              asp-action="LoginFuncionario"
+              method="post"
+              class="auth-form login-form"
+              id="loginForm">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-message">
+            </div>
+
+            <div class="login-switch" role="tablist" aria-label="Tipo de login">
+                <button type="button"
+                        class="login-option active"
+                        data-flow="funcionario"
+                        aria-pressed="true">
+                    Funcionário
+                </button>
+                <button type="button"
+                        class="login-option"
+                        data-flow="administrativo"
+                        aria-pressed="false">
+                    Administrativo
+                </button>
+            </div>
+
+            <div class="field-group">
+                <label asp-for="Email">E-mail</label>
+                <input asp-for="Email"
+                       type="email"
+                       placeholder="seu@email.com"
+                       autocomplete="email"
+                       required />
+                <span asp-validation-for="Email"
+                      class="validation-message">
+                </span>
+            </div>
+
+            <div class="field-group">
+                <label asp-for="Senha">Senha</label>
+                <input asp-for="Senha"
+                       type="password"
+                       placeholder="Sua senha"
+                       autocomplete="current-password"
+                       required />
+                <span asp-validation-for="Senha"
+                      class="validation-message">
+                </span>
+            </div>
+
+            <button type="submit"
+                    class="btn-login-submit"
+                    id="loginSubmitButton">
+                Entrar como funcionário
+            </button>
+
+        </form>
+
+    </main>
+
+    <script>
+        (function () {
+            const form = document.getElementById('loginForm');
+            const submitButton = document.getElementById('loginSubmitButton');
+            const options = document.querySelectorAll('.login-option');
+
+            const setFlow = (flow) => {
+                const isFuncionario = flow === 'funcionario';
+                const url = isFuncionario
+                    ? '@Url.Action("LoginFuncionario", "Auth")'
+                    : '@Url.Action("Login", "Auth")';
+
+                form.setAttribute('action', url);
+
+                options.forEach((option) => {
+                    const isActive = option.dataset.flow === flow;
+                    option.classList.toggle('active', isActive);
+                    option.setAttribute('aria-pressed', String(isActive));
+                });
+
+                submitButton.textContent = isFuncionario
+                    ? 'Entrar como funcionário'
+                    : 'Entrar como administrador';
+            };
+
+            options.forEach((option) => {
+                option.addEventListener('click', () => setFlow(option.dataset.flow));
+            });
+
+            setFlow('funcionario');
+        })();
+    </script>
+
+</body>
+</html>

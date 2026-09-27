@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Tech4Hr</title>
+
+    <link rel="stylesheet"
+          href="~/css/tech4hr.css"
+          asp-append-version="true" />
+</head>
+
+<body class="app-page">
+
+    <partial name="_Sidebar" />
+
+    <div class="app-shell">
+
+        <partial name="_Topbar" />
+
+        <main class="content-area">
+            @RenderBody()
+        </main>
+
+    </div>
+
+    <script src="~/js/tech4hr.js"
+            asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+
+</html>

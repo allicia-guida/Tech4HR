@@ -6,11 +6,14 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    DECLARE @Agora DATETIMEOFFSET(0) =
-        SYSDATETIMEOFFSET();
+    DECLARE @AgoraUtc DATETIMEOFFSET(0) =
+        CONVERT(DATETIMEOFFSET(0), SYSUTCDATETIME());
+
+    DECLARE @AgoraBrasil DATETIMEOFFSET(0) =
+        @AgoraUtc AT TIME ZONE 'E. South America Standard Time';
 
     DECLARE @DataPonto DATE =
-        CONVERT(DATE, @Agora);
+        CONVERT(DATE, @AgoraBrasil);
 
     DECLARE @IdPonto INT;
 
@@ -117,38 +120,38 @@ BEGIN
             @IdFuncionario,
             @IdPonto,
             @TipoRegistro,
-            @Agora
+            @AgoraUtc
         );
 
-        -- Atualiza o espelho do expediente.
+        -- Atualiza o espelho do expediente no fuso de Brasília.
 
         UPDATE dbo.Ponto
         SET
             Entrada =
                 CASE
                     WHEN @TipoRegistro = 'ENTRADA'
-                    THEN CAST(@Agora AS DATETIME2(0))
+                    THEN CAST(@AgoraBrasil AS DATETIME2(0))
                     ELSE Entrada
                 END,
 
             SaidaAlmoco =
                 CASE
                     WHEN @TipoRegistro = 'SAIDA_ALMOCO'
-                    THEN CAST(@Agora AS DATETIME2(0))
+                    THEN CAST(@AgoraBrasil AS DATETIME2(0))
                     ELSE SaidaAlmoco
                 END,
 
             EntradaAlmoco =
                 CASE
                     WHEN @TipoRegistro = 'ENTRADA_ALMOCO'
-                    THEN CAST(@Agora AS DATETIME2(0))
+                    THEN CAST(@AgoraBrasil AS DATETIME2(0))
                     ELSE EntradaAlmoco
                 END,
 
             Saida =
                 CASE
                     WHEN @TipoRegistro = 'SAIDA'
-                    THEN CAST(@Agora AS DATETIME2(0))
+                    THEN CAST(@AgoraBrasil AS DATETIME2(0))
                     ELSE Saida
                 END
 
@@ -159,7 +162,7 @@ BEGIN
         SELECT
             @IdPonto AS IdPonto,
             @TipoRegistro AS TipoRegistro,
-            @Agora AS DataHora,
+            @AgoraUtc AS DataHora,
             'Ponto registrado com sucesso.' AS Mensagem;
 
     END TRY

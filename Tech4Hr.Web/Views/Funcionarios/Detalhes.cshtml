@@ -1,0 +1,154 @@
+@model Tech4Hr.Web.Models.FuncionarioDetalhesViewModel
+
+@{
+    ViewData["Title"] = "Dados do funcionário";
+
+    static string FormatarHorario(DateTime? horario)
+    {
+        return horario.HasValue
+            ? horario.Value.ToString("HH:mm")
+            : "-";
+    }
+}
+
+<section class="page-section">
+
+    <div class="page-header">
+
+        <div>
+            <a asp-controller="Funcionarios"
+               asp-action="Index"
+               class="back-link">
+                ← Voltar para funcionários
+            </a>
+
+            <h2>@Model.Funcionario.NomeCompleto</h2>
+
+            <p>
+                Consulte os dados cadastrais e os registros
+                de ponto deste funcionário.
+            </p>
+        </div>
+
+        <a asp-controller="Funcionarios"
+           asp-action="Editar"
+           asp-route-id="@Model.Funcionario.IdFuncionario"
+           class="btn-primary">
+            Editar dados
+        </a>
+
+    </div>
+
+    <div class="employee-details-card">
+
+        <div class="employee-details-header">
+
+            <div>
+                <span class="details-label">
+                    Funcionário
+                </span>
+
+                <h3>@Model.Funcionario.NomeCompleto</h3>
+            </div>
+
+            @if (Model.Funcionario.Ativo)
+            {
+                <span class="status-badge status-active">
+                    Ativo
+                </span>
+            }
+            else
+            {
+                <span class="status-badge status-inactive">
+                    Inativo
+                </span>
+            }
+
+        </div>
+
+        <div class="employee-details-grid">
+
+            <div class="detail-item">
+                <span>E-mail corporativo</span>
+                <strong>@Model.Funcionario.EmailCorporativo</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>CPF</span>
+                <strong>@Model.Funcionario.CPF</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Data de admissão</span>
+                <strong>
+                    @Model.Funcionario.DataAdmissao.ToString("dd/MM/yyyy")
+                </strong>
+            </div>
+
+            <div class="detail-item">
+                <span>ID do funcionário</span>
+                <strong>@Model.Funcionario.IdFuncionario</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="employee-points-section">
+
+        <div>
+            <span class="details-label">
+                Registros
+            </span>
+
+            <h3>Pontos registrados</h3>
+        </div>
+
+        @if (Model.Pontos.Count == 0)
+        {
+            <div class="employee-points-empty">
+                Nenhum registro de ponto encontrado para este funcionário.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive employee-points-table">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Entrada</th>
+                            <th>Saída almoço</th>
+                            <th>Retorno almoço</th>
+                            <th>Saída</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ponto in Model.Pontos)
+                        {
+                            <tr>
+                                <td>
+                                    @ponto.DataPonto.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @FormatarHorario(ponto.Entrada)
+                                </td>
+                                <td>
+                                    @FormatarHorario(ponto.SaidaAlmoco)
+                                </td>
+                                <td>
+                                    @FormatarHorario(ponto.EntradaAlmoco)
+                                </td>
+                                <td>
+                                    @FormatarHorario(ponto.Saida)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+
+</section>

@@ -1,0 +1,62 @@
+@model Tech4Hr.Web.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var ehAdmin = string.Equals(
+        Context.Session.GetString("UsuarioNivel"),
+        "ADMIN",
+        StringComparison.OrdinalIgnoreCase);
+}
+
+<section class="page-section">
+
+    @if (TempData["Erro"] is not null)
+    {
+        <div class="alert-error">
+            @TempData["Erro"]
+        </div>
+    }
+
+    <div class="page-header">
+        <div>
+            <h2>@(ehAdmin ? "Visão geral administrativa" : "Resumo operacional")</h2>
+            <p>@(ehAdmin ? "Resumo do sistema Tech4Hr." : "Dados gerais da operação e da equipe.")</p>
+        </div>
+    </div>
+
+    <div class="employee-details-grid">
+        <div class="detail-item">
+            <span>Total de funcionários</span>
+            <strong>@Model.TotalFuncionarios</strong>
+        </div>
+
+        <div class="detail-item">
+            <span>Funcionários ativos</span>
+            <strong>@Model.FuncionariosAtivos</strong>
+        </div>
+
+        @if (ehAdmin)
+        {
+            <div class="detail-item">
+                <span>Total de usuários</span>
+                <strong>@Model.TotalUsuarios</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Usuários ativos</span>
+                <strong>@Model.UsuariosAtivos</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Administradores</span>
+                <strong>@Model.TotalAdministradores</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Operacionais</span>
+                <strong>@Model.TotalOperacionais</strong>
+            </div>
+        }
+    </div>
+
+</section>
