@@ -1,6 +1,99 @@
+@model IReadOnlyList<Tech4Hr.Web.Models.UsuarioApiResponse>
+
 @{
     ViewData["Title"] = "Usuários";
 }
 
-<h1>Usuários Administrativos</h1>
-<p>Listagem de usuários administrativos.</p>
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h2>Usuários administrativos</h2>
+            <p>Gerencie os acessos e o status dos usuários do sistema.</p>
+        </div>
+
+        <a asp-controller="Usuarios"
+           asp-action="Cadastrar"
+           class="btn-primary">
+            + Cadastrar usuário
+        </a>
+    </div>
+
+    @if (TempData["Erro"] is not null)
+    {
+        <div class="alert-error">
+            @TempData["Erro"]
+        </div>
+    }
+
+    <div class="table-card">
+        @if (Model.Count == 0)
+        {
+            <div class="empty-state">
+                Nenhum usuário cadastrado.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>E-mail</th>
+                            <th>Nível</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var usuario in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@usuario.NomeCompleto</strong>
+                                </td>
+                                <td>@usuario.Email</td>
+                                <td>@usuario.NivelUsuario</td>
+                                <td>
+                                    @if (usuario.Ativo)
+                                    {
+                                        <span class="status-badge status-active">Ativo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-inactive">Inativo</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a asp-controller="Usuarios"
+                                           asp-action="Editar"
+                                           asp-route-id="@usuario.IdUsuario"
+                                           class="btn-action btn-action-secondary">
+                                            Editar
+                                        </a>
+
+                                        <form asp-controller="Usuarios"
+                                              asp-action="AlterarStatus"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@usuario.IdUsuario" />
+                                            <input type="hidden" name="ativo" value="@(!usuario.Ativo)" />
+                                            <button type="submit"
+                                                    class="btn-action @(usuario.Ativo ? "btn-action-danger" : "btn-action-secondary")"
+                                                    onclick="return confirm('Tem certeza que deseja seguir com a ação?');">
+                                                @(usuario.Ativo ? "Desativar" : "Ativar")
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+</section>

@@ -1,8 +1,24 @@
-<header>
+@{
+    var titulo = ViewData["Title"]?.ToString() ?? "Tech4Hr";
+
+    var nivelUsuario =
+        Context.Session.GetString("UsuarioNivel");
+}
+
+<header class="topbar">
+
     <div>
-        <strong>Tech4Hr</strong>
+        <p class="topbar-label">
+            Tech4Hr
+        </p>
+
+        <h1>@titulo</h1>
     </div>
-    <div>
-        <span>Área administrativa</span>
+
+    <div class="topbar-profile">
+        <span>
+            @nivelUsuario
+        </span>
     </div>
+
 </header>

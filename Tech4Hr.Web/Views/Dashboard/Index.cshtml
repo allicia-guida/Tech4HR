@@ -1,6 +1,55 @@
+@model Tech4Hr.Web.Models.DashboardViewModel
+
 @{
     ViewData["Title"] = "Dashboard";
 }
 
-<h1>Dashboard</h1>
-<p>Área administrativa do Tech4Hr.</p>
+<section class="page-section">
+
+    @if (TempData["Erro"] is not null)
+    {
+        <div class="alert-error">
+            @TempData["Erro"]
+        </div>
+    }
+
+    <div class="page-header">
+        <div>
+            <h2>Visão geral</h2>
+            <p>Resumo administrativo do sistema Tech4Hr.</p>
+        </div>
+    </div>
+
+    <div class="employee-details-grid">
+        <div class="detail-item">
+            <span>Total de funcionários</span>
+            <strong>@Model.TotalFuncionarios</strong>
+        </div>
+
+        <div class="detail-item">
+            <span>Funcionários ativos</span>
+            <strong>@Model.FuncionariosAtivos</strong>
+        </div>
+
+        <div class="detail-item">
+            <span>Total de usuários</span>
+            <strong>@Model.TotalUsuarios</strong>
+        </div>
+
+        <div class="detail-item">
+            <span>Usuários ativos</span>
+            <strong>@Model.UsuariosAtivos</strong>
+        </div>
+
+        <div class="detail-item">
+            <span>Administradores</span>
+            <strong>@Model.TotalAdministradores</strong>
+        </div>
+
+        <div class="detail-item">
+            <span>Operacionais</span>
+            <strong>@Model.TotalOperacionais</strong>
+        </div>
+    </div>
+
+</section>
