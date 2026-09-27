@@ -1,0 +1,161 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #f4f8ff;
+    color: #1e3a5f;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-height: 100vh;
+    padding: 30px;
+}
+
+h1,
+h2 {
+    margin-bottom: 25px;
+    text-align: center;
+    color: #0d6efd;
+}
+
+/* LOGIN */
+
+.auth-page {
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(13, 110, 253, 0.14),
+            rgba(25, 135, 84, 0.12)
+        ),
+        #f4f8ff;
+}
+
+.auth-card {
+    width: min(430px, 100%);
+    padding: 42px 38px;
+
+    background-color: white;
+
+    border: 1px solid #dbe7ff;
+    border-radius: 16px;
+
+    box-shadow: 0 18px 45px rgba(13, 58, 110, 0.14);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.auth-brand {
+    width: fit-content;
+
+    margin: 0 auto 22px;
+    padding: 8px 14px;
+
+    background-color: #eaf3ff;
+    color: #0d6efd;
+
+    border-radius: 999px;
+
+    font-weight: bold;
+}
+
+.auth-card h2 {
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.auth-text {
+    margin-bottom: 28px;
+
+    color: #56708f;
+
+    line-height: 1.5;
+    text-align: center;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.auth-form input {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid #bcd0ee;
+    border-radius: 6px;
+
+    outline: none;
+
+    background-color: #fbfdff;
+
+    transition: 0.3s;
+}
+
+.auth-form input:focus {
+    border-color: #0d6efd;
+
+    box-shadow:
+        0 0 5px rgba(13, 110, 253, 0.3);
+}
+
+.auth-form button {
+    width: 100%;
+
+    margin-top: 6px;
+    padding: 12px;
+
+    background-color: #0d6efd;
+    color: white;
+
+    border: none;
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+.auth-form button:hover {
+    background-color: #0b5ed7;
+}
+
+.auth-link-text {
+    margin-top: 24px;
+
+    color: #56708f;
+
+    text-align: center;
+}
+
+.validation-message {
+    color: #dc3545;
+    font-size: 14px;
+}
+
+.validation-message:empty {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .auth-page {
+        padding: 20px;
+    }
+
+    .auth-card {
+        padding: 32px 24px;
+    }
+}
