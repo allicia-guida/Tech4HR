@@ -26,6 +26,12 @@ public sealed class FuncionarioApiResponse
     [JsonPropertyName("ativo")]
     public bool Ativo { get; set; }
 
+    [JsonPropertyName("nivelAcesso")]
+    public string NivelAcesso { get; set; } = "FUNCIONARIO";
+
+    public bool EhOperacional =>
+        string.Equals(NivelAcesso, "OPERACIONAL", StringComparison.OrdinalIgnoreCase);
+
     public string NomeCompleto =>
         $"{Nome} {Sobrenome}".Trim();
 }
@@ -55,6 +61,10 @@ public sealed class FuncionarioCadastroInputModel
 
     [Required(ErrorMessage = "A data de admissão é obrigatória.")]
     public DateTime? DataAdmissao { get; set; }
+
+    /// <summary>Só o ADMIN escolhe. Para os demais o controller força FUNCIONARIO.</summary>
+    [RegularExpression("^(FUNCIONARIO|OPERACIONAL)$", ErrorMessage = "Nível de acesso inválido.")]
+    public string NivelAcesso { get; set; } = "FUNCIONARIO";
 }
 
 public sealed class FuncionarioEdicaoInputModel
@@ -78,4 +88,8 @@ public sealed class FuncionarioEdicaoInputModel
 
     [Required(ErrorMessage = "A data de admissão é obrigatória.")]
     public DateTime? DataAdmissao { get; set; }
+
+    /// <summary>Só o ADMIN altera. Nulo mantém o nível atual.</summary>
+    [RegularExpression("^(FUNCIONARIO|OPERACIONAL)?$", ErrorMessage = "Nível de acesso inválido.")]
+    public string? NivelAcesso { get; set; }
 }

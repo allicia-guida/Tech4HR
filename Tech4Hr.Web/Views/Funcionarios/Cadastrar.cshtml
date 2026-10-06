@@ -54,6 +54,18 @@
                     <input asp-for="DataAdmissao" type="date" />
                     <span asp-validation-for="DataAdmissao" class="validation-message"></span>
                 </div>
+
+                @if (string.Equals(Context.Session.GetString("UsuarioNivel"), "ADMIN", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="field-group funcionario-field full-width">
+                        <label asp-for="NivelAcesso">Nível de acesso</label>
+                        <select asp-for="NivelAcesso">
+                            <option value="FUNCIONARIO">Funcionário</option>
+                            <option value="OPERACIONAL">Operacional (também gere funcionários e consulta pontos)</option>
+                        </select>
+                        <span asp-validation-for="NivelAcesso" class="validation-message"></span>
+                    </div>
+                }
             </div>
 
             <div class="user-form-actions">

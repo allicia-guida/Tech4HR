@@ -53,6 +53,12 @@ public class AuthService : IAuthService
                     return AuthLoginResult.Failure("E-mail ou senha inválidos.");
                 }
 
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    return AuthLoginResult.Failure(
+                        "Operacionais entram pelo login de funcionário.");
+                }
+
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 return AuthLoginResult.Failure(
                     string.IsNullOrWhiteSpace(errorContent)
@@ -76,8 +82,9 @@ public class AuthService : IAuthService
 
             var nivelUsuario = authResponse.Usuario.NivelUsuario;
 
-            if (!string.Equals(nivelUsuario, "ADMIN", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(nivelUsuario, "OPERACIONAL", StringComparison.OrdinalIgnoreCase))
+            // O login administrativo é só de ADMIN. O operacional entra pelo
+            // login de funcionário.
+            if (!string.Equals(nivelUsuario, "ADMIN", StringComparison.OrdinalIgnoreCase))
             {
                 return AuthLoginResult.Failure("Usuário não possui perfil administrativo.");
             }
@@ -180,7 +187,10 @@ public class AuthService : IAuthService
                 Nome = funcionario.Nome,
                 Sobrenome = funcionario.Sobrenome,
                 EmailCorporativo = funcionario.EmailCorporativo,
-                Ativo = funcionario.Ativo
+                Ativo = funcionario.Ativo,
+                NivelAcesso = string.IsNullOrWhiteSpace(funcionario.NivelAcesso)
+                    ? "FUNCIONARIO"
+                    : funcionario.NivelAcesso.Trim().ToUpperInvariant()
             };
 
             return FuncionarioAuthLoginResult.Success(

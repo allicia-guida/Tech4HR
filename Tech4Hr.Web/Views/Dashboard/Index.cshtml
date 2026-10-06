@@ -35,6 +35,11 @@
             <strong>@Model.FuncionariosAtivos</strong>
         </div>
 
+        <div class="detail-item">
+            <span>Operacionais</span>
+            <strong>@Model.TotalOperacionais</strong>
+        </div>
+
         @if (ehAdmin)
         {
             <div class="detail-item">
@@ -50,11 +55,6 @@
             <div class="detail-item">
                 <span>Administradores</span>
                 <strong>@Model.TotalAdministradores</strong>
-            </div>
-
-            <div class="detail-item">
-                <span>Operacionais</span>
-                <strong>@Model.TotalOperacionais</strong>
             </div>
         }
     </div>

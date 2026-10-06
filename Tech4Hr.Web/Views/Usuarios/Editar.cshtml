@@ -42,7 +42,10 @@
                     <select asp-for="NivelUsuario">
                         <option value="">Selecione o nível</option>
                         <option value="ADMIN">ADMIN</option>
-                        <option value="OPERACIONAL">OPERACIONAL</option>
+                        @if (string.Equals(Model.NivelUsuario, "OPERACIONAL", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <option value="OPERACIONAL">OPERACIONAL (conta antiga, recadastrar como funcionário)</option>
+                        }
                     </select>
                     <span asp-validation-for="NivelUsuario" class="validation-message"></span>
                 </div>

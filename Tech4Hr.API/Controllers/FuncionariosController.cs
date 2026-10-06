@@ -36,10 +36,20 @@ public class FuncionariosController : ControllerBase
         string email = dto.EmailCorporativo.Trim().ToLowerInvariant();
         string cpf = dto.CPF.Trim();
 
+        string nivelAcesso = string.IsNullOrWhiteSpace(dto.NivelAcesso)
+            ? "FUNCIONARIO"
+            : dto.NivelAcesso.Trim().ToUpperInvariant();
+
         if (string.IsNullOrWhiteSpace(nome) ||
             string.IsNullOrWhiteSpace(sobrenome))
         {
             return BadRequest("Nome e sobrenome são obrigatórios.");
+        }
+
+        // Tornar alguém operacional é decisão de administrador.
+        if (nivelAcesso == "OPERACIONAL" && !User.IsInRole("ADMIN"))
+        {
+            return Forbid();
         }
 
         bool emailExiste = await _context.Funcionarios
@@ -65,7 +75,8 @@ public class FuncionariosController : ControllerBase
             EmailCorporativo = email,
             CPF = cpf,
             DataAdmissao = dto.DataAdmissao!.Value,
-            Ativo = true
+            Ativo = true,
+            NivelAcesso = nivelAcesso
         };
 
         var passwordHasher = new PasswordHasher<Funcionario>();
@@ -92,7 +103,8 @@ public class FuncionariosController : ControllerBase
             funcionario.EmailCorporativo,
             funcionario.CPF,
             funcionario.DataAdmissao,
-            funcionario.Ativo
+            funcionario.Ativo,
+            funcionario.NivelAcesso
         });
     }
 
@@ -112,7 +124,8 @@ public class FuncionariosController : ControllerBase
                 f.EmailCorporativo,
                 f.CPF,
                 f.DataAdmissao,
-                f.Ativo
+                f.Ativo,
+                f.NivelAcesso
             })
             .ToListAsync();
 
@@ -139,7 +152,8 @@ public class FuncionariosController : ControllerBase
                 f.EmailCorporativo,
                 f.CPF,
                 f.DataAdmissao,
-                f.Ativo
+                f.Ativo,
+                f.NivelAcesso
             })
             .FirstOrDefaultAsync();
 
@@ -206,6 +220,23 @@ public class FuncionariosController : ControllerBase
             return Conflict("Este CPF já está cadastrado.");
         }
 
+        // Mudar o nível de acesso (promover ou rebaixar) é decisão de administrador.
+        // Nível vazio no pedido significa manter o atual.
+        if (!string.IsNullOrWhiteSpace(dto.NivelAcesso))
+        {
+            string novoNivel = dto.NivelAcesso.Trim().ToUpperInvariant();
+
+            if (novoNivel != funcionario.NivelAcesso)
+            {
+                if (!User.IsInRole("ADMIN"))
+                {
+                    return Forbid();
+                }
+
+                funcionario.NivelAcesso = novoNivel;
+            }
+        }
+
         funcionario.Nome = nome;
         funcionario.Sobrenome = sobrenome;
         funcionario.EmailCorporativo = email;
@@ -231,7 +262,8 @@ public class FuncionariosController : ControllerBase
             funcionario.EmailCorporativo,
             funcionario.CPF,
             funcionario.DataAdmissao,
-            funcionario.Ativo
+            funcionario.Ativo,
+            funcionario.NivelAcesso
         });
     }
 

@@ -60,13 +60,24 @@ public sealed class ValidadorDeConta
                 return null;
 
             case "FUNCIONARIO":
-                var ativo = await _context.Funcionarios
+                var funcionario = await _context.Funcionarios
                     .AsNoTracking()
                     .Where(f => f.IdFuncionario == id)
-                    .Select(f => (bool?)f.Ativo)
+                    .Select(f => new { f.Ativo, f.NivelAcesso })
                     .FirstOrDefaultAsync(cancellationToken);
 
-                return ativo == true ? null : "Conta desativada.";
+                if (funcionario is null || !funcionario.Ativo)
+                {
+                    return "Conta desativada.";
+                }
+
+                // Rebaixar um operacional vale na hora, sem esperar o token vencer.
+                if (!string.Equals(funcionario.NivelAcesso, papel, StringComparison.Ordinal))
+                {
+                    return "O perfil da conta mudou. Entre novamente.";
+                }
+
+                return null;
 
             default:
                 return "Tipo de conta desconhecido.";

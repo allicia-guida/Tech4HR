@@ -58,6 +58,15 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "E-mail ou senha inválidos." });
         }
 
+        // O login administrativo é só de ADMIN. Operacional agora é um tipo de
+        // funcionário e entra pelo login de funcionário.
+        if (usuario.NivelUsuario != "ADMIN")
+        {
+            return StatusCode(
+                StatusCodes.Status403Forbidden,
+                new { message = "Operacionais entram pelo login de funcionário." });
+        }
+
         var jwt = _configuration
             .GetSection("Jwt")
             .Get<JwtSettings>()
@@ -161,9 +170,12 @@ public class AuthController : ControllerBase
         {
             new Claim(JwtRegisteredClaimNames.Sub, funcionario.IdFuncionario.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, funcionario.EmailCorporativo),
+            // O perfil vem do cadastro: FUNCIONARIO ou OPERACIONAL. O operacional
+            // continua sendo conta de funcionário (bate ponto) e ganha as rotas
+            // de gestão que exigem o papel OPERACIONAL.
             new Claim("tipo_conta", "FUNCIONARIO"),
-            new Claim("role", "FUNCIONARIO"),
-            new Claim(ClaimTypes.Role, "FUNCIONARIO")
+            new Claim("role", funcionario.NivelAcesso),
+            new Claim(ClaimTypes.Role, funcionario.NivelAcesso)
         };
 
         var expiracao = DateTime.UtcNow.AddMinutes(jwt.ExpirationMinutes);
@@ -189,7 +201,8 @@ public class AuthController : ControllerBase
                 funcionario.Nome,
                 funcionario.Sobrenome,
                 funcionario.EmailCorporativo,
-                funcionario.Ativo
+                funcionario.Ativo,
+                funcionario.NivelAcesso
             }
         });
     }

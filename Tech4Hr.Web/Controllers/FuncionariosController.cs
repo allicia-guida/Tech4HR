@@ -155,6 +155,14 @@ public class FuncionariosController : Controller
             return RedirectToAction("Index", "Dashboard");
         }
 
+        // Só o ADMIN escolhe o nível. Para o operacional, o cadastro sempre
+        // sai como FUNCIONARIO, mesmo que o formulário tenha sido adulterado.
+        if (!UsuarioEhAdmin())
+        {
+            model.NivelAcesso = "FUNCIONARIO";
+            ModelState.Remove(nameof(model.NivelAcesso));
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -228,7 +236,8 @@ public class FuncionariosController : Controller
             Sobrenome = funcionario.Sobrenome,
             EmailCorporativo = funcionario.EmailCorporativo,
             CPF = funcionario.CPF,
-            DataAdmissao = funcionario.DataAdmissao
+            DataAdmissao = funcionario.DataAdmissao,
+            NivelAcesso = funcionario.NivelAcesso
         };
 
         return View(model);
@@ -251,6 +260,13 @@ public class FuncionariosController : Controller
         if (id <= 0)
         {
             return NotFound();
+        }
+
+        // Só o ADMIN altera o nível. Para o operacional, nulo mantém o atual.
+        if (!UsuarioEhAdmin())
+        {
+            model.NivelAcesso = null;
+            ModelState.Remove(nameof(model.NivelAcesso));
         }
 
         if (!ModelState.IsValid)

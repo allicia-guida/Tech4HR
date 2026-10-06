@@ -17,6 +17,18 @@
         string.IsNullOrWhiteSpace(nomeUsuario)
             ? "usuário"
             : nomeUsuario;
+
+    // Telas de gestão: ADMIN e OPERACIONAL. O operacional também é funcionário,
+    // então vê "Meu ponto" e as telas de gestão no mesmo menu.
+    var nivelGestao =
+        Context.Session.GetString("UsuarioNivel");
+
+    var ehAdmin =
+        string.Equals(nivelGestao, "ADMIN", StringComparison.OrdinalIgnoreCase);
+
+    var temGestao =
+        ehAdmin ||
+        string.Equals(nivelGestao, "OPERACIONAL", StringComparison.OrdinalIgnoreCase);
 }
 
 <aside class="sidebar">
@@ -37,7 +49,8 @@
                     Meu ponto
                 </a>
             }
-            else
+
+            @if (temGestao)
             {
                 <a asp-controller="Dashboard"
                    asp-action="Index"
@@ -57,7 +70,7 @@
                     Pontos registrados
                 </a>
 
-                @if (Context.Session.GetString("UsuarioNivel") == "ADMIN")
+                @if (ehAdmin)
                 {
                     <a asp-controller="Usuarios"
                        asp-action="Index"

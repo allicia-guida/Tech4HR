@@ -48,8 +48,10 @@
                     <select asp-for="NivelUsuario">
                         <option value="">Selecione o nível</option>
                         <option value="ADMIN">ADMIN</option>
-                        <option value="OPERACIONAL">OPERACIONAL</option>
                     </select>
+                    <small class="field-hint">
+                        Operacionais são cadastrados em Funcionários, com o nível Operacional.
+                    </small>
                     <span asp-validation-for="NivelUsuario" class="validation-message"></span>
                 </div>
             </div>

@@ -69,6 +69,7 @@
                             <th>E-mail</th>
                             <th>CPF</th>
                             <th>Admissão</th>
+                            <th>Perfil</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -96,6 +97,10 @@
 
                                 <td>
                                     @funcionario.DataAdmissao.ToString("dd/MM/yyyy")
+                                </td>
+
+                                <td>
+                                    @(funcionario.EhOperacional ? "Operacional" : "Funcionário")
                                 </td>
 
                                 <td>

@@ -42,7 +42,13 @@ public class UsuariosController : ControllerBase
             return BadRequest("Nome e sobrenome são obrigatórios.");
         }
 
-        if (nivel != "ADMIN" && nivel != "OPERACIONAL")
+        if (nivel == "OPERACIONAL")
+        {
+            return BadRequest(
+                "Operacionais são cadastrados como funcionários, com nível OPERACIONAL.");
+        }
+
+        if (nivel != "ADMIN")
         {
             return BadRequest("Nivel do usuário inválido.");
         }
@@ -203,6 +209,14 @@ public class UsuariosController : ControllerBase
             !await ExisteOutroAdminAtivo(id))
         {
             return Conflict("O último ADMIN ativo não pode ser rebaixado.");
+        }
+
+        // Quem já era operacional na tabela de usuários continua listado (legado),
+        // mas ninguém passa a ser operacional por aqui.
+        if (nivel == "OPERACIONAL" && usuario.NivelUsuario != "OPERACIONAL")
+        {
+            return BadRequest(
+                "Operacionais são cadastrados como funcionários, com nível OPERACIONAL.");
         }
 
         usuario.Nome = nome;
