@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Dashboard";
+
     var ehAdmin = string.Equals(
         Context.Session.GetString("UsuarioNivel"),
         "ADMIN",
@@ -12,7 +13,7 @@
 
     @if (TempData["Erro"] is not null)
     {
-        <div class="alert-error">
+        <div class="alert alert-error" role="alert">
             @TempData["Erro"]
         </div>
     }
@@ -21,6 +22,17 @@
         <div>
             <h2>@(ehAdmin ? "Visão geral administrativa" : "Resumo operacional")</h2>
             <p>@(ehAdmin ? "Resumo do sistema Tech4Hr." : "Dados gerais da operação e da equipe.")</p>
+        </div>
+
+        <div class="filter-actions">
+            <a asp-controller="Pontos" asp-action="Index" class="btn-secondary">
+                <svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg>
+                Ver pontos
+            </a>
+            <a asp-controller="Funcionarios" asp-action="Cadastrar" class="btn-primary">
+                <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+                Cadastrar funcionário
+            </a>
         </div>
     </div>
 

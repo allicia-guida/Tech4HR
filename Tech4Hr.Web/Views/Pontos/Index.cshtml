@@ -3,12 +3,8 @@
 @{
     ViewData["Title"] = "Pontos registrados";
 
-    static string FormatarHorario(DateTime? horario)
-    {
-        return horario.HasValue
-            ? horario.Value.ToString("HH:mm")
-            : "-";
-    }
+    static string FormatarHorario(DateTime? horario) =>
+        horario.HasValue ? horario.Value.ToString("HH:mm") : "-";
 }
 
 <section class="page-section">
@@ -24,7 +20,7 @@
 
     @if (TempData["Erro"] is not null)
     {
-        <div class="alert-error">
+        <div class="alert alert-error" role="alert">
             @TempData["Erro"]
         </div>
     }
@@ -71,6 +67,7 @@
             <div class="filter-actions filter-actions-bottom">
                 <button type="submit"
                         class="btn-primary">
+                    <svg class="icon" aria-hidden="true"><use href="#i-filter" /></svg>
                     Filtrar
                 </button>
 
@@ -90,6 +87,7 @@
                         class="btn-secondary btn-export-xml"
                         form="form-filtros-pontos"
                         formaction="@Url.Action("ExportarXml", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
+                    <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
                     Exportar XML
                 </button>
 
@@ -97,6 +95,7 @@
                         class="btn-secondary btn-export-xlsx"
                         form="form-filtros-pontos"
                         formaction="@Url.Action("ExportarXlsx", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
+                    <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
                     Exportar XLSX
                 </button>
             </div>
@@ -128,26 +127,14 @@
                         @foreach (var registro in Model.Registros)
                         {
                             <tr>
-                                <td>
-                                    <strong>
-                                        @registro.Funcionario.NomeCompleto
-                                    </strong>
+                                <td class="cell-title" data-label="Funcionário">
+                                    <strong>@registro.Funcionario.NomeCompleto</strong>
                                 </td>
-                                <td>
-                                    @registro.DataPonto.ToString("dd/MM/yyyy")
-                                </td>
-                                <td>
-                                    @FormatarHorario(registro.Entrada)
-                                </td>
-                                <td>
-                                    @FormatarHorario(registro.SaidaAlmoco)
-                                </td>
-                                <td>
-                                    @FormatarHorario(registro.EntradaAlmoco)
-                                </td>
-                                <td>
-                                    @FormatarHorario(registro.Saida)
-                                </td>
+                                <td data-label="Data">@registro.DataPonto.ToString("dd/MM/yyyy")</td>
+                                <td data-label="Entrada">@FormatarHorario(registro.Entrada)</td>
+                                <td data-label="Saída almoço">@FormatarHorario(registro.SaidaAlmoco)</td>
+                                <td data-label="Retorno almoço">@FormatarHorario(registro.EntradaAlmoco)</td>
+                                <td data-label="Saída">@FormatarHorario(registro.Saida)</td>
                             </tr>
                         }
                     </tbody>

@@ -1,133 +1,169 @@
 @model Tech4Hr.Web.Models.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Entrar";
     Layout = null;
+
+    // Depois de um erro de senha, a tela volta na aba que a pessoa estava usando.
+    var fluxo = ViewData["Fluxo"]?.ToString() == "administrativo"
+        ? "administrativo"
+        : "funcionario";
+
+    var ehAdministrativo = fluxo == "administrativo";
 }
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1f3a" />
+    <meta name="color-scheme" content="light dark" />
 
-    <title>Login - Tech4Hr</title>
+    <title>Entrar - Tech4Hr</title>
+
+    <link rel="manifest" href="~/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="~/img/tech4hr-icon.svg" />
+    <link rel="apple-touch-icon" href="~/img/apple-touch-icon.png" />
 
     <link rel="stylesheet"
           href="~/css/tech4hr.css"
           asp-append-version="true" />
+
+    <script>
+        try {
+            if (localStorage.getItem('tech4hr-contraste') === 'true') {
+                document.documentElement.classList.add('accessibility-daltonic');
+            }
+        } catch (e) { }
+    </script>
 </head>
 
 <body class="auth-page">
 
-    <main class="auth-card auth-card-login">
+    <partial name="_Icons" />
 
-        <div class="auth-brand">Tech4Hr</div>
+    <section class="auth-hero">
+        <div class="auth-brand">
+            <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-brand" /></svg></span>
+            Tech4Hr
+        </div>
 
-        <h2>Bem-vindo ao Tech4Hr</h2>
+        <p>Gestão de pessoas e controle de ponto em um só lugar.</p>
 
-        <p class="auth-text">
-            Acesse sua conta para continuar.
-        </p>
+        <ul class="auth-hero-points">
+            <li>
+                <svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
+                Ponto registrado no horário oficial de Brasília.
+            </li>
+            <li>
+                <svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
+                Consultas e exportações em XLSX e XML.
+            </li>
+        </ul>
+    </section>
 
-        <form asp-controller="Auth"
-              asp-action="LoginFuncionario"
-              method="post"
-              class="auth-form login-form"
-              id="loginForm">
+    <main class="auth-main">
 
-            @Html.AntiForgeryToken()
+        <div class="auth-card auth-card-login">
 
-            <div asp-validation-summary="ModelOnly"
-                 class="validation-message">
-            </div>
+            <h2>Entrar</h2>
 
-            @if (TempData["Erro"] is string avisoErro)
-            {
-                <div class="validation-message" role="alert">@avisoErro</div>
-            }
+            <p class="auth-text">
+                Acesse sua conta para continuar.
+            </p>
 
-            <div class="login-switch" role="tablist" aria-label="Tipo de login">
-                <button type="button"
-                        class="login-option active"
-                        data-flow="funcionario"
-                        aria-pressed="true">
-                    Funcionário
+            <form asp-controller="Auth"
+                  asp-action="@(ehAdministrativo ? "Login" : "LoginFuncionario")"
+                  method="post"
+                  class="auth-form login-form"
+                  id="loginForm"
+                  data-action-funcionario="@Url.Action("LoginFuncionario", "Auth")"
+                  data-action-administrativo="@Url.Action("Login", "Auth")">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="validation-message"
+                     role="alert">
+                </div>
+
+                @if (TempData["Erro"] is string avisoErro)
+                {
+                    <div class="alert alert-error" role="alert">@avisoErro</div>
+                }
+
+                <div class="login-switch" role="group" aria-label="Tipo de acesso">
+                    <button type="button"
+                            class="login-option @(ehAdministrativo ? "" : "active")"
+                            data-flow="funcionario"
+                            aria-pressed="@(ehAdministrativo ? "false" : "true")">
+                        Funcionário
+                    </button>
+                    <button type="button"
+                            class="login-option @(ehAdministrativo ? "active" : "")"
+                            data-flow="administrativo"
+                            aria-pressed="@(ehAdministrativo ? "true" : "false")">
+                        Administrador
+                    </button>
+                </div>
+
+                <p class="login-hint" id="loginHint">
+                    @(ehAdministrativo
+                        ? "Acesso exclusivo de administradores."
+                        : "Funcionários e operacionais entram por aqui.")
+                </p>
+
+                <div class="field-group">
+                    <label asp-for="Email">E-mail</label>
+                    <input asp-for="Email"
+                           type="email"
+                           placeholder="seu@email.com"
+                           autocomplete="username"
+                           inputmode="email"
+                           autocapitalize="none"
+                           spellcheck="false"
+                           autofocus
+                           required />
+                    <span asp-validation-for="Email"
+                          class="validation-message">
+                    </span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Senha">Senha</label>
+                    <div class="password-field">
+                        <input asp-for="Senha"
+                               type="password"
+                               placeholder="Sua senha"
+                               autocomplete="current-password"
+                               required />
+                        <button type="button"
+                                class="password-toggle"
+                                data-toggle-password
+                                aria-label="Mostrar senha">
+                            <svg class="icon" aria-hidden="true"><use href="#i-eye" /></svg>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Senha"
+                          class="validation-message">
+                    </span>
+                </div>
+
+                <button type="submit"
+                        class="btn-login-submit"
+                        id="loginSubmitButton">
+                    @(ehAdministrativo ? "Entrar como administrador" : "Entrar como funcionário")
                 </button>
-                <button type="button"
-                        class="login-option"
-                        data-flow="administrativo"
-                        aria-pressed="false">
-                    Administrativo
-                </button>
-            </div>
 
-            <div class="field-group">
-                <label asp-for="Email">E-mail</label>
-                <input asp-for="Email"
-                       type="email"
-                       placeholder="seu@email.com"
-                       autocomplete="email"
-                       required />
-                <span asp-validation-for="Email"
-                      class="validation-message">
-                </span>
-            </div>
+            </form>
 
-            <div class="field-group">
-                <label asp-for="Senha">Senha</label>
-                <input asp-for="Senha"
-                       type="password"
-                       placeholder="Sua senha"
-                       autocomplete="current-password"
-                       required />
-                <span asp-validation-for="Senha"
-                      class="validation-message">
-                </span>
-            </div>
-
-            <button type="submit"
-                    class="btn-login-submit"
-                    id="loginSubmitButton">
-                Entrar como funcionário
-            </button>
-
-        </form>
+        </div>
 
     </main>
 
-    <script>
-        (function () {
-            const form = document.getElementById('loginForm');
-            const submitButton = document.getElementById('loginSubmitButton');
-            const options = document.querySelectorAll('.login-option');
-
-            const setFlow = (flow) => {
-                const isFuncionario = flow === 'funcionario';
-                const url = isFuncionario
-                    ? '@Url.Action("LoginFuncionario", "Auth")'
-                    : '@Url.Action("Login", "Auth")';
-
-                form.setAttribute('action', url);
-
-                options.forEach((option) => {
-                    const isActive = option.dataset.flow === flow;
-                    option.classList.toggle('active', isActive);
-                    option.setAttribute('aria-pressed', String(isActive));
-                });
-
-                submitButton.textContent = isFuncionario
-                    ? 'Entrar como funcionário'
-                    : 'Entrar como administrador';
-            };
-
-            options.forEach((option) => {
-                option.addEventListener('click', () => setFlow(option.dataset.flow));
-            });
-
-            setFlow('funcionario');
-        })();
-    </script>
+    <script src="~/js/tech4hr.js"
+            asp-append-version="true"></script>
 
 </body>
 </html>

@@ -1,17 +1,37 @@
 @{
     var titulo = ViewData["Title"]?.ToString() ?? "Tech4Hr";
 
-    var nivelUsuario =
-        Context.Session.GetString("UsuarioNivel");
+    var tipoConta = Context.Session.GetString("TipoConta");
+    var funcionarioLogado =
+        string.Equals(tipoConta, "FUNCIONARIO", StringComparison.OrdinalIgnoreCase);
+
+    var nome = funcionarioLogado
+        ? Context.Session.GetString("FuncionarioNome")
+        : Context.Session.GetString("UsuarioNome");
+
+    var nivel = Context.Session.GetString("UsuarioNivel");
+
+    var perfil = string.Equals(nivel, "ADMIN", StringComparison.OrdinalIgnoreCase)
+        ? "Administrador"
+        : string.Equals(nivel, "OPERACIONAL", StringComparison.OrdinalIgnoreCase)
+            ? "Operacional"
+            : "Funcionário";
+
+    // Iniciais para o avatar: primeira letra do primeiro e do último nome.
+    var partes = (nome ?? string.Empty)
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+    var iniciais = partes.Length == 0
+        ? "T"
+        : partes.Length == 1
+            ? partes[0][..1].ToUpperInvariant()
+            : (partes[0][..1] + partes[^1][..1]).ToUpperInvariant();
 }
 
 <header class="topbar">
 
-    <div>
-        <p class="topbar-label">
-            Tech4Hr
-        </p>
-
+    <div class="topbar-heading">
+        <p class="topbar-label">Tech4Hr</p>
         <h1>@titulo</h1>
     </div>
 
@@ -20,15 +40,31 @@
                 id="toggle-acessibilidade"
                 class="topbar-access-btn"
                 aria-pressed="false"
-                title="Ativar contraste suave">
-            👁️
+                aria-label="Ativar modo de contraste para daltonismo"
+                title="Modo de contraste para daltonismo">
+            <svg class="icon" aria-hidden="true"><use href="#i-contrast" /></svg>
         </button>
 
         <div class="topbar-profile">
-            <span>
-                @nivelUsuario
+            <span class="avatar" aria-hidden="true">@iniciais</span>
+            <span class="topbar-profile-text">
+                <span class="topbar-profile-name">@(string.IsNullOrWhiteSpace(nome) ? "Usuário" : nome)</span>
+                <span class="topbar-profile-role">@perfil</span>
             </span>
         </div>
+
+        <form asp-controller="Auth"
+              asp-action="Logout"
+              method="post"
+              class="topbar-logout-form">
+            @Html.AntiForgeryToken()
+            <button type="submit"
+                    class="topbar-logout"
+                    aria-label="Sair"
+                    title="Sair">
+                <svg class="icon" aria-hidden="true"><use href="#i-logout" /></svg>
+            </button>
+        </form>
     </div>
 
 </header>

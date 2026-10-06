@@ -6,9 +6,22 @@ namespace Tech4Hr.Web.Controllers;
 
 public class HomeController : Controller
 {
+    // A raiz do site leva cada pessoa para a própria tela: o funcionário (e o
+    // operacional) para o registro de ponto, o administrador para o painel e
+    // quem não entrou ainda para o login.
     public IActionResult Index()
     {
-        return View();
+        if (!string.IsNullOrWhiteSpace(HttpContext.Session.GetString("FuncionarioAuthToken")))
+        {
+            return RedirectToAction("Index", "MeuPonto");
+        }
+
+        if (!string.IsNullOrWhiteSpace(HttpContext.Session.GetString("AuthToken")))
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        return RedirectToAction("Login", "Auth");
     }
 
     public IActionResult Privacy()

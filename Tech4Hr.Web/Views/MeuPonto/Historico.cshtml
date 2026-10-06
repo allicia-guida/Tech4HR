@@ -2,33 +2,43 @@
 
 @{
     ViewData["Title"] = "Meu histórico";
+
+    static string Hora(DateTime? horario) =>
+        horario.HasValue ? horario.Value.ToString("HH:mm") : "--";
 }
 
-<div class="funcionario-page funcionario-historico-page">
+<div class="funcionario-page funcionario-page-wide funcionario-historico-page">
+
     <div class="funcionario-header">
         <div>
             <p class="eyebrow">Histórico</p>
             <h2>Meu histórico</h2>
         </div>
-        <a asp-controller="MeuPonto" asp-action="Index" class="btn-secondary compact">Voltar</a>
+        <a asp-controller="MeuPonto" asp-action="Index" class="btn-secondary compact">
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg>
+            Voltar
+        </a>
     </div>
 
     @if (TempData["Erro"] is string erro)
     {
-        <div class="alert danger">@erro</div>
+        <div class="alert alert-error" role="alert">@erro</div>
     }
 
     <div class="filters-card compact-card">
         <form method="get" class="filter-form history-form">
             <div class="field-group">
-                <label>Data inicial</label>
-                <input type="date" name="dataInicio" value="@(Model.DataInicio.HasValue ? Model.DataInicio.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                <label for="dataInicio">Data inicial</label>
+                <input type="date" id="dataInicio" name="dataInicio" value="@(Model.DataInicio.HasValue ? Model.DataInicio.Value.ToString("yyyy-MM-dd") : string.Empty)" />
             </div>
             <div class="field-group">
-                <label>Data final</label>
-                <input type="date" name="dataFim" value="@(Model.DataFim.HasValue ? Model.DataFim.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                <label for="dataFim">Data final</label>
+                <input type="date" id="dataFim" name="dataFim" value="@(Model.DataFim.HasValue ? Model.DataFim.Value.ToString("yyyy-MM-dd") : string.Empty)" />
             </div>
-            <button type="submit" class="btn-login-submit history-submit">Filtrar</button>
+            <button type="submit" class="btn-primary history-submit">
+                <svg class="icon" aria-hidden="true"><use href="#i-filter" /></svg>
+                Filtrar
+            </button>
         </form>
     </div>
 
@@ -54,11 +64,11 @@
                         @foreach (var ponto in Model.Registros)
                         {
                             <tr>
-                                <td>@ponto.DataPonto.ToString("dd/MM/yyyy")</td>
-                                <td>@(ponto.Entrada.HasValue ? ponto.Entrada.Value.ToString("HH:mm") : "--")</td>
-                                <td>@(ponto.SaidaAlmoco.HasValue ? ponto.SaidaAlmoco.Value.ToString("HH:mm") : "--")</td>
-                                <td>@(ponto.EntradaAlmoco.HasValue ? ponto.EntradaAlmoco.Value.ToString("HH:mm") : "--")</td>
-                                <td>@(ponto.Saida.HasValue ? ponto.Saida.Value.ToString("HH:mm") : "--")</td>
+                                <td class="cell-title" data-label="Data"><strong>@ponto.DataPonto.ToString("dd/MM/yyyy")</strong></td>
+                                <td data-label="Entrada">@Hora(ponto.Entrada)</td>
+                                <td data-label="Saída almoço">@Hora(ponto.SaidaAlmoco)</td>
+                                <td data-label="Retorno">@Hora(ponto.EntradaAlmoco)</td>
+                                <td data-label="Saída">@Hora(ponto.Saida)</td>
                             </tr>
                         }
                     </tbody>
@@ -66,4 +76,5 @@
             </div>
         }
     </div>
+
 </div>

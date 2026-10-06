@@ -2,33 +2,70 @@
 
 @{
     ViewData["Title"] = "Meu ponto";
+
     var temHoraOficial = Model.ServidorEpochMs > 0;
     var ptBr = new System.Globalization.CultureInfo("pt-BR");
+
     var dataHoje = temHoraOficial
         ? Model.DataAtual.ToString("dddd, dd 'de' MMMM", ptBr)
         : string.Empty;
+
     var horaInicial = temHoraOficial
         ? Model.DataAtual.ToString("HH:mm:ss", ptBr)
         : "--:--:--";
+
     var registroHoje = Model.PontoHoje ?? new Tech4Hr.Web.Models.PontoApiResponse();
+
+    var primeiroNome = (Model.NomeFuncionario ?? string.Empty)
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .FirstOrDefault() ?? "Funcionário";
+
+    // Texto do botão conforme a próxima batida que a API permite.
+    var textoBotao = Model.ProximoTipoRegistro switch
+    {
+        "ENTRADA" => "Registrar entrada",
+        "SAIDA_ALMOCO" => "Registrar saída para o almoço",
+        "ENTRADA_ALMOCO" => "Registrar retorno do almoço",
+        "SAIDA" => "Registrar saída",
+        _ => Model.PodeRegistrarPonto ? "Registrar ponto" : "Jornada de hoje concluída"
+    };
+
+    var etapas = new[]
+    {
+        (Tipo: "ENTRADA", Nome: "Entrada", Hora: registroHoje.Entrada),
+        (Tipo: "SAIDA_ALMOCO", Nome: "Saída para o almoço", Hora: registroHoje.SaidaAlmoco),
+        (Tipo: "ENTRADA_ALMOCO", Nome: "Retorno do almoço", Hora: registroHoje.EntradaAlmoco),
+        (Tipo: "SAIDA", Nome: "Saída", Hora: registroHoje.Saida)
+    };
 }
 
 <div class="funcionario-page funcionario-clock-page">
+
     <div class="clock-card">
-        <div class="clock-topbar">
-            <div class="tech-brand">Tech4Hr</div>
-            <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-inline-form">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="logout-inline-button">Sair</button>
-            </form>
+
+        <div>
+            <p class="clock-greeting">Olá, @primeiroNome</p>
+            <p class="clock-date" id="clockDate">@dataHoje</p>
         </div>
 
-        <div class="clock-date" id="clockDate">@dataHoje</div>
         <div class="clock-time"
              id="clockTime"
+             role="timer"
+             aria-live="off"
              data-servidor-epoch="@Model.ServidorEpochMs"
              data-fuso="@Model.FusoHorario">@horaInicial</div>
-        <div class="clock-label">Horário atual</div>
+
+        <p class="clock-label">Horário de Brasília</p>
+
+        @if (TempData["Sucesso"] is string sucesso)
+        {
+            <div class="alert alert-success" role="status">@sucesso</div>
+        }
+
+        @if (TempData["Erro"] is string erro)
+        {
+            <div class="alert alert-error" role="alert">@erro</div>
+        }
 
         <form asp-controller="MeuPonto"
               asp-action="RegistrarPonto"
@@ -40,20 +77,12 @@
             <button type="submit"
                     class="btn-registro"
                     id="btnRegistrarPonto"
+                    data-loading-text="Registrando..."
                     disabled="@(Model.PodeRegistrarPonto ? null : "disabled")">
-                @(Model.PodeRegistrarPonto ? "REGISTRAR PONTO" : "Jornada registrada por completo hoje.")
+                <svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg>
+                @textoBotao
             </button>
         </form>
-
-        @if (TempData["Sucesso"] is string sucesso)
-        {
-            <div class="alert success">@sucesso</div>
-        }
-
-        @if (TempData["Erro"] is string erro)
-        {
-            <div class="alert danger">@erro</div>
-        }
 
         <div class="registro-hoje">
             <div class="registro-hoje-header">
@@ -61,29 +90,30 @@
             </div>
 
             <div class="registro-lista">
-                <div class="registro-item @(registroHoje.Entrada.HasValue ? "ok" : "pending")">
-                    <span>Entrada</span>
-                    <strong>@(registroHoje.Entrada.HasValue ? registroHoje.Entrada.Value.ToString("HH:mm") : "--:--")</strong>
-                </div>
-                <div class="registro-item @(registroHoje.SaidaAlmoco.HasValue ? "ok" : "pending")">
-                    <span>Saída para almoço</span>
-                    <strong>@(registroHoje.SaidaAlmoco.HasValue ? registroHoje.SaidaAlmoco.Value.ToString("HH:mm") : "--:--")</strong>
-                </div>
-                <div class="registro-item @(registroHoje.EntradaAlmoco.HasValue ? "ok" : "pending")">
-                    <span>Retorno do almoço</span>
-                    <strong>@(registroHoje.EntradaAlmoco.HasValue ? registroHoje.EntradaAlmoco.Value.ToString("HH:mm") : "--:--")</strong>
-                </div>
-                <div class="registro-item @(registroHoje.Saida.HasValue ? "ok" : "pending")">
-                    <span>Saída</span>
-                    <strong>@(registroHoje.Saida.HasValue ? registroHoje.Saida.Value.ToString("HH:mm") : "--:--")</strong>
-                </div>
+                @foreach (var etapa in etapas)
+                {
+                    var feito = etapa.Hora.HasValue;
+                    var ehProxima = !feito && etapa.Tipo == Model.ProximoTipoRegistro;
+
+                    <div class="registro-item @(feito ? "ok" : ehProxima ? "next" : "pending")">
+                        <span>@etapa.Nome</span>
+                        <strong>@(feito ? etapa.Hora!.Value.ToString("HH:mm") : "--:--")</strong>
+                    </div>
+                }
             </div>
         </div>
 
         <div class="history-action">
-            <a asp-controller="MeuPonto" asp-action="Historico" class="btn-historico">Ver meu histórico</a>
+            <a asp-controller="MeuPonto"
+               asp-action="Historico"
+               class="btn-historico">
+                <svg class="icon" aria-hidden="true"><use href="#i-history" /></svg>
+                Ver meu histórico
+            </a>
         </div>
+
     </div>
+
 </div>
 
 @section Scripts {
@@ -127,15 +157,6 @@
 
             atualizarRelogio();
             setInterval(atualizarRelogio, 1000);
-
-            const form = document.getElementById('registrarPontoForm');
-            const button = document.getElementById('btnRegistrarPonto');
-            if (!form || !button) return;
-
-            form.addEventListener('submit', function () {
-                button.disabled = true;
-                button.textContent = 'Registrando...';
-            });
         })();
     </script>
 }

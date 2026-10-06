@@ -25,6 +25,9 @@ public class AuthController : Controller
         LoginViewModel model,
         CancellationToken cancellationToken)
     {
+        // Em caso de erro a tela volta na aba "Administrador".
+        ViewData["Fluxo"] = "administrativo";
+
         if (!ModelState.IsValid)
         {
             return View(model);

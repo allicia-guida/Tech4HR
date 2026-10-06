@@ -1,45 +1,54 @@
 @model Tech4Hr.Web.Models.UsuarioCadastroInputModel
 
 @{
-    ViewData["Title"] = "Cadastrar Usuário";
+    ViewData["Title"] = "Cadastrar usuário";
 }
 
 <section class="page-section">
     <div class="page-header">
         <div>
-            <a asp-controller="Usuarios" asp-action="Index" class="back-link">← Voltar para usuários</a>
+            <a asp-controller="Usuarios" asp-action="Index" class="back-link">
+                <svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg>
+                Voltar para usuários
+            </a>
             <h2>Cadastrar usuário</h2>
-            <p>Crie um usuário administrativo com acesso ao painel Tech4Hr.</p>
+            <p>Crie um administrador com acesso ao painel Tech4Hr.</p>
         </div>
     </div>
 
-    <div class="table-card user-form-card">
+    <div class="user-form-card">
         <form asp-action="Cadastrar" method="post" class="auth-form user-form">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="validation-message"></div>
+            <div asp-validation-summary="ModelOnly" class="validation-message" role="alert"></div>
 
             <div class="user-form-grid">
                 <div class="field-group user-field">
                     <label asp-for="Nome">Nome</label>
-                    <input asp-for="Nome" />
+                    <input asp-for="Nome" autocomplete="off" />
                     <span asp-validation-for="Nome" class="validation-message"></span>
                 </div>
 
                 <div class="field-group user-field">
                     <label asp-for="Sobrenome">Sobrenome</label>
-                    <input asp-for="Sobrenome" />
+                    <input asp-for="Sobrenome" autocomplete="off" />
                     <span asp-validation-for="Sobrenome" class="validation-message"></span>
                 </div>
 
                 <div class="field-group user-field">
                     <label asp-for="Email">E-mail</label>
-                    <input asp-for="Email" type="email" />
+                    <input asp-for="Email" type="email" inputmode="email" autocapitalize="none" autocomplete="off" />
                     <span asp-validation-for="Email" class="validation-message"></span>
                 </div>
 
                 <div class="field-group user-field">
                     <label asp-for="Senha">Senha</label>
-                    <input asp-for="Senha" type="password" />
+                    <div class="password-field">
+                        <input asp-for="Senha" type="password" autocomplete="new-password" />
+                        <button type="button" class="password-toggle" data-toggle-password aria-label="Mostrar senha">
+                            <svg class="icon" aria-hidden="true"><use href="#i-eye" /></svg>
+                        </button>
+                    </div>
+                    <span class="field-hint">Mínimo de 8 caracteres.</span>
                     <span asp-validation-for="Senha" class="validation-message"></span>
                 </div>
 
@@ -49,15 +58,16 @@
                         <option value="">Selecione o nível</option>
                         <option value="ADMIN">ADMIN</option>
                     </select>
-                    <small class="field-hint">
+                    <span class="field-hint">
                         Operacionais são cadastrados em Funcionários, com o nível Operacional.
-                    </small>
+                    </span>
                     <span asp-validation-for="NivelUsuario" class="validation-message"></span>
                 </div>
             </div>
 
             <div class="user-form-actions">
-                <button type="submit" class="btn-primary">Salvar usuário</button>
+                <a asp-controller="Usuarios" asp-action="Index" class="btn-secondary">Cancelar</a>
+                <button type="submit" class="btn-primary" data-loading-text="Salvando...">Salvar usuário</button>
             </div>
         </form>
     </div>

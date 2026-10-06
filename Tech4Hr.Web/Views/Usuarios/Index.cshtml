@@ -9,19 +9,20 @@
     <div class="page-header">
         <div>
             <h2>Usuários administrativos</h2>
-            <p>Gerencie os acessos e o status dos usuários do sistema.</p>
+            <p>Gerencie os acessos e o status dos administradores do sistema.</p>
         </div>
 
         <a asp-controller="Usuarios"
            asp-action="Cadastrar"
            class="btn-primary">
-            + Cadastrar usuário
+            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+            Cadastrar usuário
         </a>
     </div>
 
     @if (TempData["Erro"] is not null)
     {
-        <div class="alert-error">
+        <div class="alert alert-error" role="alert">
             @TempData["Erro"]
         </div>
     }
@@ -50,12 +51,12 @@
                         @foreach (var usuario in Model)
                         {
                             <tr>
-                                <td>
+                                <td class="cell-title" data-label="Usuário">
                                     <strong>@usuario.NomeCompleto</strong>
                                 </td>
-                                <td>@usuario.Email</td>
-                                <td>@usuario.NivelUsuario</td>
-                                <td>
+                                <td data-label="E-mail">@usuario.Email</td>
+                                <td data-label="Nível">@usuario.NivelUsuario</td>
+                                <td data-label="Status">
                                     @if (usuario.Ativo)
                                     {
                                         <span class="status-badge status-active">Ativo</span>
@@ -65,25 +66,32 @@
                                         <span class="status-badge status-inactive">Inativo</span>
                                     }
                                 </td>
-                                <td>
+                                <td class="cell-actions" data-label="Ações">
                                     <div class="table-actions">
                                         <a asp-controller="Usuarios"
                                            asp-action="Editar"
                                            asp-route-id="@usuario.IdUsuario"
-                                           class="btn-action btn-action-secondary">
-                                            Editar
+                                           class="btn-action btn-action-secondary"
+                                           title="Editar">
+                                            <svg class="icon" aria-hidden="true"><use href="#i-edit" /></svg>
+                                            <span class="btn-action-label">Editar</span>
                                         </a>
 
                                         <form asp-controller="Usuarios"
                                               asp-action="AlterarStatus"
-                                              method="post">
+                                              method="post"
+                                              data-confirm-title="@(usuario.Ativo ? "Desativar usuário?" : "Ativar usuário?")"
+                                              data-confirm="@(usuario.Ativo ? $"{usuario.NomeCompleto} perde o acesso ao sistema agora, mesmo que esteja logado." : $"{usuario.NomeCompleto} volta a ter acesso ao sistema.")"
+                                              data-confirm-ok="@(usuario.Ativo ? "Desativar" : "Ativar")"
+                                              data-confirm-danger="@(usuario.Ativo ? "true" : "false")">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@usuario.IdUsuario" />
                                             <input type="hidden" name="ativo" value="@(!usuario.Ativo)" />
                                             <button type="submit"
                                                     class="btn-action @(usuario.Ativo ? "btn-action-danger" : "btn-action-secondary")"
-                                                    onclick="return confirm('Tem certeza que deseja seguir com a ação?');">
-                                                @(usuario.Ativo ? "Desativar" : "Ativar")
+                                                    title="@(usuario.Ativo ? "Desativar" : "Ativar")">
+                                                <svg class="icon" aria-hidden="true"><use href="#i-power" /></svg>
+                                                <span class="btn-action-label">@(usuario.Ativo ? "Desativar" : "Ativar")</span>
                                             </button>
                                         </form>
                                     </div>
