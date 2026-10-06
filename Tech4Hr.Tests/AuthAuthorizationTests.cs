@@ -12,6 +12,7 @@ using Tech4Hr.API.Controllers;
 using Tech4Hr.API.Data;
 using Tech4Hr.API.DTOs;
 using Tech4Hr.API.Models;
+using Tech4Hr.API.Services;
 
 namespace Tech4Hr.Tests;
 
@@ -54,7 +55,7 @@ public class AuthAuthorizationTests
             })
             .Build();
 
-        var controller = new AuthController(context, config);
+        var controller = new AuthController(context, config, new LimiteDeTentativasDeLogin(TimeProvider.System));
         var result = await controller.Login(new LoginUsuarioDto
         {
             Email = "admin@teste.com",
@@ -103,7 +104,7 @@ public class AuthAuthorizationTests
             })
             .Build();
 
-        var controller = new AuthController(context, config);
+        var controller = new AuthController(context, config, new LimiteDeTentativasDeLogin(TimeProvider.System));
         var result = await controller.LoginFuncionario(new LoginFuncionarioDto
         {
             EmailCorporativo = "maria@empresa.com",

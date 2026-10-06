@@ -59,6 +59,12 @@ public class AuthService : IAuthService
                         "Operacionais entram pelo login de funcionário.");
                 }
 
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    return AuthLoginResult.Failure(
+                        await LerMensagemDeBloqueioAsync(response, cancellationToken));
+                }
+
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 return AuthLoginResult.Failure(
                     string.IsNullOrWhiteSpace(errorContent)
@@ -158,6 +164,12 @@ public class AuthService : IAuthService
                     return FuncionarioAuthLoginResult.Failure("E-mail ou senha inválidos.");
                 }
 
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    return FuncionarioAuthLoginResult.Failure(
+                        await LerMensagemDeBloqueioAsync(response, cancellationToken));
+                }
+
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 return FuncionarioAuthLoginResult.Failure(
                     string.IsNullOrWhiteSpace(errorContent)
@@ -215,5 +227,34 @@ public class AuthService : IAuthService
         {
             return FuncionarioAuthLoginResult.Failure("Ocorreu um erro ao tentar autenticar o funcionário.");
         }
+    }
+
+    // A API responde 429 com { "message": "..." } quando a conta foi bloqueada
+    // por tentativas demais. A mensagem já diz quanto tempo esperar.
+    private static async Task<string> LerMensagemDeBloqueioAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        const string padrao = "Muitas tentativas de login. Tente novamente em alguns minutos.";
+
+        try
+        {
+            var corpo = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            using var documento = JsonDocument.Parse(corpo);
+
+            if (documento.RootElement.ValueKind == JsonValueKind.Object &&
+                documento.RootElement.TryGetProperty("message", out var mensagem) &&
+                mensagem.ValueKind == JsonValueKind.String &&
+                !string.IsNullOrWhiteSpace(mensagem.GetString()))
+            {
+                return mensagem.GetString()!;
+            }
+        }
+        catch (JsonException)
+        {
+        }
+
+        return padrao;
     }
 }

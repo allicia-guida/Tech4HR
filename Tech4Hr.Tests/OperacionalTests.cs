@@ -99,7 +99,7 @@ public class OperacionalTests
         contexto.Funcionarios.Add(NovoFuncionario("op@empresa.com", "11111111111", "OPERACIONAL"));
         await contexto.SaveChangesAsync();
 
-        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt());
+        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt(), new LimiteDeTentativasDeLogin(TimeProvider.System));
 
         var resultado = await controller.LoginFuncionario(new LoginFuncionarioDto
         {
@@ -123,7 +123,7 @@ public class OperacionalTests
         contexto.Funcionarios.Add(NovoFuncionario("maria@empresa.com", "22222222222"));
         await contexto.SaveChangesAsync();
 
-        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt());
+        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt(), new LimiteDeTentativasDeLogin(TimeProvider.System));
 
         var resultado = await controller.LoginFuncionario(new LoginFuncionarioDto
         {
@@ -144,7 +144,7 @@ public class OperacionalTests
         contexto.Funcionarios.Add(NovoFuncionario("op@empresa.com", "12121212121", "OPERACIONAL"));
         await contexto.SaveChangesAsync();
 
-        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt());
+        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt(), new LimiteDeTentativasDeLogin(TimeProvider.System));
 
         var resultado = await controller.LoginFuncionario(new LoginFuncionarioDto
         {
@@ -173,7 +173,7 @@ public class OperacionalTests
         });
         await contexto.SaveChangesAsync();
 
-        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt());
+        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt(), new LimiteDeTentativasDeLogin(TimeProvider.System));
 
         var resultado = await controller.Login(new LoginUsuarioDto
         {

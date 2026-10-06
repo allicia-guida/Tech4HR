@@ -137,6 +137,19 @@ builder.Services.AddSingleton<RelogioBrasil>();
 
 builder.Services.AddScoped<ValidadorDeConta>();
 
+// Limite de tentativas de login por conta. Os valores podem ser ajustados em
+// Seguranca:Login (MaxFalhas, JanelaMinutos, BloqueioMinutos).
+builder.Services.AddSingleton(provider =>
+{
+    var configuracao = provider.GetRequiredService<IConfiguration>();
+
+    return new LimiteDeTentativasDeLogin(
+        provider.GetRequiredService<TimeProvider>(),
+        configuracao.GetValue("Seguranca:Login:MaxFalhas", 5),
+        TimeSpan.FromMinutes(configuracao.GetValue("Seguranca:Login:JanelaMinutos", 10)),
+        TimeSpan.FromMinutes(configuracao.GetValue("Seguranca:Login:BloqueioMinutos", 10)));
+});
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 

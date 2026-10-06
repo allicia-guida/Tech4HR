@@ -8,6 +8,7 @@ using Tech4Hr.API.Configurations;
 using Tech4Hr.API.Data;
 using Tech4Hr.API.DTOs;
 using Tech4Hr.API.Models;
+using Tech4Hr.API.Services;
 
 namespace Tech4Hr.API.Controllers;
 
@@ -17,13 +18,38 @@ public class AuthController : ControllerBase
 {
     private readonly Tech4HrDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly LimiteDeTentativasDeLogin _limite;
 
     public AuthController(
         Tech4HrDbContext context,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        LimiteDeTentativasDeLogin limite)
     {
         _context = context;
         _configuration = configuration;
+        _limite = limite;
+    }
+
+    // Resposta de uma conta bloqueada por tentativas demais. O Retry-After vai
+    // em segundos e a mensagem em minutos, para a pessoa saber quando voltar.
+    private IActionResult TentativasEsgotadas(TimeSpan espera)
+    {
+        int minutos = Math.Max(1, (int)Math.Ceiling(espera.TotalMinutes));
+
+        if (HttpContext is not null)
+        {
+            Response.Headers.RetryAfter =
+                ((int)Math.Ceiling(espera.TotalSeconds)).ToString();
+        }
+
+        return StatusCode(
+            StatusCodes.Status429TooManyRequests,
+            new
+            {
+                message = minutos == 1
+                    ? "Muitas tentativas de login. Tente novamente em 1 minuto."
+                    : $"Muitas tentativas de login. Tente novamente em {minutos} minutos."
+            });
     }
 
     [HttpPost("login")]
@@ -36,12 +62,19 @@ public class AuthController : ControllerBase
         }
 
         string email = dto.Email.Trim().ToLowerInvariant();
+        string chaveConta = LimiteDeTentativasDeLogin.Chave("USUARIO", email);
+
+        if (_limite.TempoRestanteDeBloqueio(chaveConta) is { } espera)
+        {
+            return TentativasEsgotadas(espera);
+        }
 
         var usuario = await _context.Usuarios
             .FirstOrDefaultAsync(u => u.Email == email);
 
         if (usuario == null || !usuario.Ativo)
         {
+            _limite.RegistrarFalha(chaveConta);
             return Unauthorized(new { message = "E-mail ou senha inválidos." });
         }
 
@@ -55,8 +88,11 @@ public class AuthController : ControllerBase
 
         if (resultado == PasswordVerificationResult.Failed)
         {
+            _limite.RegistrarFalha(chaveConta);
             return Unauthorized(new { message = "E-mail ou senha inválidos." });
         }
+
+        _limite.RegistrarSucesso(chaveConta);
 
         // O login administrativo é só de ADMIN. Operacional agora é um tipo de
         // funcionário e entra pelo login de funcionário.
@@ -129,12 +165,19 @@ public class AuthController : ControllerBase
         }
 
         string email = dto.EmailCorporativo.Trim().ToLowerInvariant();
+        string chaveConta = LimiteDeTentativasDeLogin.Chave("FUNCIONARIO", email);
+
+        if (_limite.TempoRestanteDeBloqueio(chaveConta) is { } espera)
+        {
+            return TentativasEsgotadas(espera);
+        }
 
         var funcionario = await _context.Funcionarios
             .FirstOrDefaultAsync(f => f.EmailCorporativo == email);
 
         if (funcionario == null || !funcionario.Ativo)
         {
+            _limite.RegistrarFalha(chaveConta);
             return Unauthorized(new { message = "E-mail ou senha inválidos." });
         }
 
@@ -148,8 +191,11 @@ public class AuthController : ControllerBase
 
         if (resultado == PasswordVerificationResult.Failed)
         {
+            _limite.RegistrarFalha(chaveConta);
             return Unauthorized(new { message = "E-mail ou senha inválidos." });
         }
+
+        _limite.RegistrarSucesso(chaveConta);
 
         var jwt = _configuration
             .GetSection("Jwt")
