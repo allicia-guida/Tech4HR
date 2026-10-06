@@ -1,5 +1,6 @@
 import { getEnvironment } from "@/config/environment";
 import { sessionCredentials } from "@/services/auth/session-credentials";
+import { parseErrorMessage } from "./error-message";
 
 const REQUEST_TIMEOUT_MS = 15_000;
 let unauthorizedHandler: (() => void) | null = null;
@@ -24,16 +25,7 @@ const responseMessage = async (response: Response) => {
       ? "Sessão expirada. Entre novamente."
       : "Não foi possível concluir a solicitação.";
   try {
-    const body = (await response.json()) as {
-      message?: unknown;
-      title?: unknown;
-      errors?: Record<string, unknown>;
-    };
-    if (typeof body.message === "string") return body.message;
-    if (typeof body.title === "string") return body.title;
-    const validation = Object.values(body.errors ?? {}).flat();
-    const first = validation.find((item) => typeof item === "string");
-    return typeof first === "string" ? first : fallback;
+    return parseErrorMessage(await response.text(), fallback);
   } catch {
     return fallback;
   }
@@ -43,10 +35,14 @@ export const apiRequest = async <T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> => {
-  const { EXPO_PUBLIC_API_URL } = getEnvironment();
+  const { EXPO_PUBLIC_API_URL, EXPO_PUBLIC_APP_ENV } = getEnvironment();
   if (!EXPO_PUBLIC_API_URL) throw new ApiError(0);
   const url = new URL(path, EXPO_PUBLIC_API_URL);
-  if (url.protocol !== "https:") throw new ApiError(0);
+  // HTTPS sempre. HTTP só em desenvolvimento, para testar contra a API na rede
+  // local (por exemplo http://192.168.0.10:5287).
+  const insecureAllowed =
+    EXPO_PUBLIC_APP_ENV === "development" && url.protocol === "http:";
+  if (url.protocol !== "https:" && !insecureAllowed) throw new ApiError(0);
   const accessToken = sessionCredentials.getAccessToken();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

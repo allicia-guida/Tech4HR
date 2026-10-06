@@ -14,6 +14,7 @@ import { TimeEntryRow } from "@/components/attendance/time-entry-row";
 import { useTimeEntries } from "@/features/attendance/hooks/use-time-entries";
 import { useAppTheme } from "@/theme/theme-provider";
 import { dateKey, formatLongDate, formatTime } from "@/utils/date";
+import { serverClock } from "@/utils/server-clock";
 import { useSessionStore } from "@/stores/session-store";
 import { useNetworkStore } from "@/stores/network-store";
 
@@ -25,11 +26,16 @@ export default function HomeScreen() {
   const connected = useNetworkStore(
     (state) => state.connected && state.reachable,
   );
-  const [now, setNow] = useState(new Date());
+  // O intervalo só força uma nova renderização a cada 30 segundos. A hora é
+  // calculada na renderização, pela hora oficial da API (Brasília), não pela
+  // do aparelho. Quando o histórico chega o relógio acabou de ser sincronizado
+  // e a tela também renderiza de novo.
+  const [, setTick] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000);
+    const id = setInterval(() => setTick((value) => value + 1), 30_000);
     return () => clearInterval(id);
   }, []);
+  const now = serverClock.now();
   const today = useMemo(() => {
     const date = dateKey();
     return (entries.data ?? [])

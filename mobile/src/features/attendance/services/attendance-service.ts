@@ -3,6 +3,7 @@ import { getEnvironment } from "@/config/environment";
 import { offlineQueue } from "@/features/offline/services/offline-queue";
 import { apiAttendanceRepository } from "../repositories/api-attendance-repository";
 import { AttendanceRepository } from "../repositories/attendance-repository";
+import { tech4hrAttendanceRepository } from "../repositories/tech4hr-attendance-repository";
 import {
   AttendanceLocation,
   TimeEntry,
@@ -10,9 +11,11 @@ import {
 } from "../types/time-entry";
 
 const repository = (): AttendanceRepository => {
-  if (!getEnvironment().EXPO_PUBLIC_API_URL)
-    throw new Error("API_NOT_CONFIGURED");
-  return apiAttendanceRepository;
+  const { EXPO_PUBLIC_API_URL, EXPO_PUBLIC_API_TARGET } = getEnvironment();
+  if (!EXPO_PUBLIC_API_URL) throw new Error("API_NOT_CONFIGURED");
+  return EXPO_PUBLIC_API_TARGET === "tech4hr"
+    ? tech4hrAttendanceRepository
+    : apiAttendanceRepository;
 };
 
 export const attendanceService = {

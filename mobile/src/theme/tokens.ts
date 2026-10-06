@@ -13,33 +13,36 @@ export type ThemeColors = {
   overlay: string;
 };
 
+// A paleta é a mesma do site (Tech4Hr.Web, wwwroot/css/tech4hr.css), para o
+// aplicativo e o site parecerem um produto só.
 export const lightColors: ThemeColors = {
-  background: "#F8F9FB",
+  background: "#F3F6FB",
   surface: "#FFFFFF",
   surfaceSecondary: "#F1F5F9",
   text: "#0F172A",
   textSecondary: "#64748B",
   border: "#E2E8F0",
-  primary: "#146EF5",
-  primaryPressed: "#0F5DCE",
-  success: "#22C55E",
-  danger: "#EF4444",
+  primary: "#2563EB",
+  primaryPressed: "#1D4ED8",
+  success: "#15803D",
+  danger: "#B91C1C",
   onPrimary: "#FFFFFF",
   overlay: "rgba(15,23,42,0.48)",
 };
 
 export const darkColors: ThemeColors = {
-  background: "#111820",
-  surface: "#18212B",
-  surfaceSecondary: "#202B36",
-  text: "#F8FAFC",
-  textSecondary: "#94A3B8",
-  border: "#2B3744",
-  primary: "#1473E6",
-  primaryPressed: "#0F63C8",
-  success: "#22C55E",
-  danger: "#EF4444",
-  onPrimary: "#FFFFFF",
+  background: "#0B1220",
+  surface: "#111B2E",
+  surfaceSecondary: "#0F1829",
+  text: "#E6EDF7",
+  textSecondary: "#93A4BD",
+  border: "#223049",
+  primary: "#60A5FA",
+  primaryPressed: "#93C5FD",
+  success: "#4ADE80",
+  danger: "#F87171",
+  // Texto escuro sobre o azul claro do tema escuro, para manter o contraste.
+  onPrimary: "#0B1220",
   overlay: "rgba(0,0,0,0.64)",
 };
 

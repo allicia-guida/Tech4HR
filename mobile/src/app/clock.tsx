@@ -21,7 +21,9 @@ import {
 } from "@/features/attendance/types/time-entry";
 import { locationService } from "@/features/attendance/services/location-service";
 import { useAppTheme } from "@/theme/theme-provider";
+import { ApiError } from "@/services/api/http-client";
 import { formatReceiptDate, formatTime } from "@/utils/date";
+import { serverClock } from "@/utils/server-clock";
 
 function Detail({ label, value }: { label: string; value: string }) {
   const { colors } = useAppTheme();
@@ -39,7 +41,8 @@ export default function ClockScreen() {
   const router = useRouter();
   const mutation = useCreateTimeEntry();
   const entries = useTimeEntries();
-  const now = new Date();
+  // Hora oficial da API (Brasília), não a do aparelho.
+  const now = serverClock.now();
   const type = nextTimeEntryType(entries.data ?? []);
   const [location, setLocation] = useState<AttendanceLocation | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -169,6 +172,11 @@ export default function ClockScreen() {
                 : mutation.error instanceof Error &&
                     mutation.error.message === "API_NOT_CONFIGURED"
                   ? "A API segura do Tech4HR ainda não foi configurada neste aplicativo."
+                : mutation.error instanceof ApiError &&
+                    mutation.error.status >= 400 &&
+                    mutation.error.status < 500 &&
+                    mutation.error.status !== 401
+                  ? mutation.error.message
                 : "Não foi possível registrar. Tente novamente."}
           </Text>
         ) : null}
