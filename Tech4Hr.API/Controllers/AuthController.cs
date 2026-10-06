@@ -202,7 +202,8 @@ public class AuthController : ControllerBase
                 funcionario.Sobrenome,
                 funcionario.EmailCorporativo,
                 funcionario.Ativo,
-                funcionario.NivelAcesso
+                funcionario.NivelAcesso,
+                funcionario.DataAdmissao
             }
         });
     }

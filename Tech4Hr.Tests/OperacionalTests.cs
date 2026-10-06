@@ -138,6 +138,30 @@ public class OperacionalTests
     }
 
     [Fact]
+    public async Task LoginFuncionario_DevolveNivelEDataDeAdmissaoParaOApp()
+    {
+        await using var contexto = CriarContexto();
+        contexto.Funcionarios.Add(NovoFuncionario("op@empresa.com", "12121212121", "OPERACIONAL"));
+        await contexto.SaveChangesAsync();
+
+        var controller = new ApiAuthController(contexto, CriarConfiguracaoJwt());
+
+        var resultado = await controller.LoginFuncionario(new LoginFuncionarioDto
+        {
+            EmailCorporativo = "op@empresa.com",
+            Senha = "Senha@123"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(resultado);
+        var funcionario = ok.Value!.GetType().GetProperty("funcionario")!.GetValue(ok.Value)!;
+
+        Assert.Equal("OPERACIONAL", LerPropriedade(funcionario, "NivelAcesso"));
+        Assert.Equal(
+            new DateTime(2026, 1, 1),
+            (DateTime)funcionario.GetType().GetProperty("DataAdmissao")!.GetValue(funcionario)!);
+    }
+
+    [Fact]
     public async Task LoginAdministrativo_UsuarioOperacionalAntigo_EhRecusadoComMensagem()
     {
         await using var contexto = CriarContexto();
