@@ -123,6 +123,10 @@ Os eventos são mantidos para auditoria e o sistema também mantém um espelho d
 
 Os horários de negócio são tratados considerando o fuso horário de Brasília/São Paulo.
 
+O dia e a hora do ponto vêm sempre da API, nunca do relógio do navegador ou do aparelho. O endpoint `GET /api/pontos/hoje` devolve a data de referência, a hora oficial com o deslocamento do fuso, o espelho do dia e a próxima batida permitida. A tela de registro usa essa resposta, então um celular com a hora errada ou em outro fuso mostra e registra o mesmo horário de Brasília.
+
+Quando a regra de negócio recusa uma batida (fora de sequência, por exemplo), a API responde `409` com a mensagem em português, que aparece na tela do funcionário.
+
 ## Segurança
 
 O sistema utiliza autenticação baseada em JWT.
@@ -131,9 +135,15 @@ Existem diferentes níveis de acesso:
 
 | Perfil | Permissões |
 |---|---|
-| ADMIN | Acesso completo às funcionalidades administrativas |
-| OPERACIONAL | Gerenciamento de funcionários e consulta de pontos |
+| ADMIN | Acesso completo às funcionalidades administrativas. Entra pelo login administrativo |
+| OPERACIONAL | É um funcionário com permissão extra: registra o próprio ponto e também gerencia funcionários e consulta pontos. Entra pelo login de funcionário |
 | FUNCIONÁRIO | Registro e consulta dos próprios pontos |
+
+Regras de permissão:
+
+- Somente o `ADMIN` ativa e desativa funcionários e usuários, e somente ele define se um funcionário é `OPERACIONAL`.
+- O nível de acesso do funcionário fica na coluna `Funcionario.NivelAcesso` (`FUNCIONARIO` ou `OPERACIONAL`). A tabela `Usuario` guarda apenas administradores.
+- Desativar uma conta vale na hora: a API confere no banco, a cada requisição, se a conta do token continua ativa e com o mesmo perfil. Uma sessão aberta cai no próximo clique.
 
 As senhas são armazenadas utilizando hash e não são mantidas em texto puro.
 
@@ -158,6 +168,8 @@ A interface foi desenvolvida para diferentes tamanhos de tela, incluindo:
 
 A área de registro de ponto do funcionário possui uma interface especialmente adaptada para utilização em dispositivos móveis.
 
+No celular e no tablet a navegação fica em uma barra de abas fixa na parte de baixo da tela, e as tabelas viram cartões empilhados. No desktop o menu é lateral. A rolagem é suave (respeitando a opção "reduzir movimento" do sistema), o tema escuro segue o sistema e o botão de contraste da barra superior ativa uma paleta segura para daltonismo. O site traz um manifesto web e ícones, então pode ser instalado na tela inicial do celular.
+
 ## Como executar
 
 ### Pré-requisitos
@@ -173,9 +185,40 @@ git clone <URL-DO-REPOSITORIO>
 cd Tech4HR
 ```
 
-Configure a connection string e demais informações sensíveis utilizando **User Secrets** ou variáveis de ambiente.
+Prepare o banco executando os scripts da pasta `database` em ordem, no banco `Tech4HrDB`:
+
+| Script | O que faz |
+|---|---|
+| `01_criar_tabelas.sql` | Cria as tabelas (somente em banco novo) |
+| `02_registrar_ponto.sql` | Cria a procedure `sp_RegistrarPonto` |
+| `03_triggers.sql` | Impede remover o último administrador ativo |
+| `04_operacional_funcionario.sql` | Cria a coluna `Funcionario.NivelAcesso`. Pode rodar mais de uma vez |
+
+> Em um banco que já existe, execute o `04` **antes** de publicar a versão nova da API. Sem a coluna, a API não consegue consultar funcionários.
+
+Configure a connection string e demais informações sensíveis utilizando **User Secrets** ou variáveis de ambiente. A chave JWT precisa estar em Base64 e ter pelo menos 32 bytes.
+
+```bash
+dotnet user-secrets set "ConnectionStrings:Tech4HrDB" "<connection string do banco>" --project Tech4Hr.API
+dotnet user-secrets set "Jwt:Issuer" "Tech4Hr" --project Tech4Hr.API
+dotnet user-secrets set "Jwt:Audience" "Tech4HrClientes" --project Tech4Hr.API
+dotnet user-secrets set "Jwt:Key" "<chave Base64 de 32 bytes ou mais>" --project Tech4Hr.API
+dotnet user-secrets set "Jwt:ExpirationMinutes" "60" --project Tech4Hr.API
+```
+
+Para gerar uma chave JWT (PowerShell):
+
+```powershell
+$b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
+```
 
 > Não armazene senhas, connection strings ou chaves JWT diretamente no repositório.
+
+O primeiro administrador é criado uma única vez, em ambiente de desenvolvimento:
+
+```bash
+dotnet run --project Tech4Hr.API -- --criar-admin-inicial
+```
 
 Execute a API:
 
