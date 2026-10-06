@@ -1,0 +1,47 @@
+name: CI
+
+# Compila a solução e roda os testes a cada push na main, na dev e nas branches
+# feature/, e em todo Pull Request para a main e a dev. Roda em Linux e em
+# Windows: o servidor de produção pode ser qualquer um dos dois, e o fuso
+# horário do ponto se comporta diferente.
+
+on:
+  push:
+    branches: [main, dev, "feature/**"]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-e-testes:
+    name: Build e testes (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restaurar pacotes
+        run: dotnet restore Tech4Hr.slnx
+
+      - name: Compilar
+        run: dotnet build Tech4Hr.slnx --configuration Release --no-restore
+
+      - name: Rodar os testes
+        run: dotnet test Tech4Hr.slnx --configuration Release --no-build --verbosity normal
