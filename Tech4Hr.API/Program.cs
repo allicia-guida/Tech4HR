@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tech4Hr.API.Configurations;
 using Tech4Hr.API.Data;
+using Tech4Hr.API.Services;
 using Tech4Hr.API.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,6 +110,10 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("ADMIN");
     });
 });
+
+// Relógio do ponto: sempre o horário de Brasília, vindo do servidor.
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<RelogioBrasil>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

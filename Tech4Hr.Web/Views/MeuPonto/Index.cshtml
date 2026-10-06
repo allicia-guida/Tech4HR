@@ -2,7 +2,14 @@
 
 @{
     ViewData["Title"] = "Meu ponto";
-    var dataHoje = Model.DataAtual.ToString("dddd, dd 'de' MMMM");
+    var temHoraOficial = Model.ServidorEpochMs > 0;
+    var ptBr = new System.Globalization.CultureInfo("pt-BR");
+    var dataHoje = temHoraOficial
+        ? Model.DataAtual.ToString("dddd, dd 'de' MMMM", ptBr)
+        : string.Empty;
+    var horaInicial = temHoraOficial
+        ? Model.DataAtual.ToString("HH:mm:ss", ptBr)
+        : "--:--:--";
     var registroHoje = Model.PontoHoje ?? new Tech4Hr.Web.Models.PontoApiResponse();
 }
 
@@ -16,8 +23,11 @@
             </form>
         </div>
 
-        <div class="clock-date">@dataHoje</div>
-        <div class="clock-time" id="clockTime">@DateTime.Now.ToString("HH:mm:ss")</div>
+        <div class="clock-date" id="clockDate">@dataHoje</div>
+        <div class="clock-time"
+             id="clockTime"
+             data-servidor-epoch="@Model.ServidorEpochMs"
+             data-fuso="@Model.FusoHorario">@horaInicial</div>
         <div class="clock-label">Horário atual</div>
 
         <form asp-controller="MeuPonto"
@@ -82,15 +92,37 @@
             const element = document.getElementById('clockTime');
             if (!element) return;
 
+            const elementoData = document.getElementById('clockDate');
+            const fuso = element.dataset.fuso || 'America/Sao_Paulo';
+            const servidor = Number(element.dataset.servidorEpoch) || 0;
+
+            // Diferença entre a hora oficial da API e o relógio do aparelho,
+            // medida uma vez ao carregar. Assim um aparelho com a hora errada
+            // ou em outro fuso continua mostrando o horário de Brasília.
+            const diferenca = servidor > 0 ? servidor - Date.now() : 0;
+
+            const formatoHora = new Intl.DateTimeFormat('pt-BR', {
+                timeZone: fuso,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hourCycle: 'h23'
+            });
+
+            const formatoData = new Intl.DateTimeFormat('pt-BR', {
+                timeZone: fuso,
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long'
+            });
+
             const atualizarRelogio = () => {
-                const agora = new Date();
-                const hora = agora.toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
-                });
-                element.textContent = hora;
+                const agora = new Date(Date.now() + diferenca);
+                element.textContent = formatoHora.format(agora);
+
+                if (elementoData) {
+                    elementoData.textContent = formatoData.format(agora);
+                }
             };
 
             atualizarRelogio();

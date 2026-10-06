@@ -95,6 +95,32 @@ public class PontoService : IPontoService
         return registro ?? new PontoRegistroResultado();
     }
 
+    public async Task<PontoHojeApiResponse> ObterHojeAsync(
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        var client = _httpClientFactory.CreateClient("Tech4HrApi");
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, "api/pontos/hoje");
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await client.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                $"Não foi possível consultar o ponto de hoje. " +
+                $"Status: {(int)response.StatusCode}.");
+        }
+
+        var hoje = await response.Content.ReadFromJsonAsync<PontoHojeApiResponse>(cancellationToken: cancellationToken);
+
+        return hoje ?? throw new HttpRequestException(
+            "A API devolveu uma resposta vazia para o ponto de hoje.");
+    }
+
     public async Task<IReadOnlyList<PontoApiResponse>> ConsultarMeusPontosAsync(
         string token,
         DateTime? dataInicio = null,

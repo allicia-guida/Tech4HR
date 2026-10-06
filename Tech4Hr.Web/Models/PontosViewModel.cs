@@ -58,6 +58,28 @@ public sealed class PontoRegistroResultado
     public string Mensagem { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// Resposta de GET api/pontos/hoje: o dia e a hora oficiais vêm da API, no
+/// horário de Brasília, e não do relógio do servidor Web nem do aparelho.
+/// </summary>
+public sealed class PontoHojeApiResponse
+{
+    [JsonPropertyName("dataReferencia")]
+    public DateOnly DataReferencia { get; set; }
+
+    [JsonPropertyName("agora")]
+    public DateTimeOffset Agora { get; set; }
+
+    [JsonPropertyName("fusoHorario")]
+    public string FusoHorario { get; set; } = "America/Sao_Paulo";
+
+    [JsonPropertyName("ponto")]
+    public PontoApiResponse? Ponto { get; set; }
+
+    [JsonPropertyName("proximoTipoRegistro")]
+    public string? ProximoTipoRegistro { get; set; }
+}
+
 public sealed class PontosConsultaViewModel
 {
     public int? IdFuncionario { get; set; }
@@ -82,7 +104,12 @@ public sealed class MeuPontoViewModel
     public string? UltimoRegistro { get; set; }
     public bool PodeRegistrarPonto { get; set; } = true;
     public string ProximoTipoRegistro { get; set; } = "ENTRADA";
-    public DateTime DataAtual { get; set; } = DateTime.Now;
+    public DateTime DataAtual { get; set; }
+
+    /// <summary>Hora oficial da API em milissegundos Unix. Zero quando a API não respondeu.</summary>
+    public long ServidorEpochMs { get; set; }
+
+    public string FusoHorario { get; set; } = "America/Sao_Paulo";
     public PontoApiResponse? PontoHoje { get; set; }
 }
 

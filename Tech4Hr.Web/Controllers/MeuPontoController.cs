@@ -22,36 +22,6 @@ public class MeuPontoController : Controller
             && string.Equals(tipoConta, "FUNCIONARIO", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string? ObterProximoTipoRegistro(PontoApiResponse? pontoHoje)
-    {
-        if (pontoHoje is null)
-        {
-            return "ENTRADA";
-        }
-
-        if (!pontoHoje.Entrada.HasValue)
-        {
-            return "ENTRADA";
-        }
-
-        if (!pontoHoje.SaidaAlmoco.HasValue)
-        {
-            return "SAIDA_ALMOCO";
-        }
-
-        if (!pontoHoje.EntradaAlmoco.HasValue)
-        {
-            return "ENTRADA_ALMOCO";
-        }
-
-        if (!pontoHoje.Saida.HasValue)
-        {
-            return "SAIDA";
-        }
-
-        return null;
-    }
-
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -65,26 +35,22 @@ public class MeuPontoController : Controller
 
         try
         {
-            var hoje = DateTime.Today;
-            var registros = await _pontoService.ConsultarMeusPontosAsync(
-                token!,
-                hoje,
-                hoje,
-                cancellationToken);
+            // O dia e a hora vêm da API (horário de Brasília), não do relógio
+            // do servidor Web nem do aparelho de quem está batendo o ponto.
+            var hoje = await _pontoService.ObterHojeAsync(token!, cancellationToken);
 
-            var pontoHoje = registros
-                .OrderByDescending(p => p.DataPonto)
-                .FirstOrDefault();
-
-            var proximoTipo = ObterProximoTipoRegistro(pontoHoje);
+            var pontoHoje = hoje.Ponto;
+            var proximoTipo = hoje.ProximoTipoRegistro;
 
             var model = new MeuPontoViewModel
             {
                 NomeFuncionario = string.IsNullOrWhiteSpace(nome) ? "Funcionário" : nome,
-                Registros = registros
-                    .OrderByDescending(p => p.DataPonto)
-                    .ToList(),
-                DataAtual = DateTime.Now,
+                Registros = pontoHoje is null
+                    ? Array.Empty<PontoApiResponse>()
+                    : new[] { pontoHoje },
+                DataAtual = hoje.Agora.DateTime,
+                ServidorEpochMs = hoje.Agora.ToUnixTimeMilliseconds(),
+                FusoHorario = hoje.FusoHorario,
                 PontoHoje = pontoHoje,
                 ProximoTipoRegistro = proximoTipo ?? string.Empty,
                 PodeRegistrarPonto = !string.IsNullOrWhiteSpace(proximoTipo),
@@ -97,10 +63,11 @@ public class MeuPontoController : Controller
         {
             TempData["Erro"] = ex.Message;
 
+            // Sem resposta da API não há hora oficial: a tela mostra o relógio
+            // do aparelho em horário de Brasília e bloqueia o registro.
             return View(new MeuPontoViewModel
             {
                 NomeFuncionario = string.IsNullOrWhiteSpace(nome) ? "Funcionário" : nome,
-                DataAtual = DateTime.Now,
                 PodeRegistrarPonto = false,
                 ProximoTipoRegistro = string.Empty
             });
@@ -164,18 +131,9 @@ public class MeuPontoController : Controller
 
         try
         {
-            var hoje = DateTime.Today;
-            var registrosHoje = await _pontoService.ConsultarMeusPontosAsync(
-                token!,
-                hoje,
-                hoje,
-                cancellationToken);
+            var hoje = await _pontoService.ObterHojeAsync(token!, cancellationToken);
 
-            var pontoHoje = registrosHoje
-                .OrderByDescending(p => p.DataPonto)
-                .FirstOrDefault();
-
-            var tipoRegistro = ObterProximoTipoRegistro(pontoHoje);
+            var tipoRegistro = hoje.ProximoTipoRegistro;
 
             if (string.IsNullOrWhiteSpace(tipoRegistro))
             {
