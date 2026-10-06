@@ -1,9 +1,17 @@
+using Tech4Hr.Web.Filters;
 using Tech4Hr.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Se a API recusar o token (conta desativada), volta ao login.
+    options.Filters.Add<SessaoExpiradaFilter>();
+});
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<SessaoExpiradaHandler>();
 
 builder.Services.AddHttpClient("Tech4HrApi", client =>
 {
@@ -12,7 +20,8 @@ builder.Services.AddHttpClient("Tech4HrApi", client =>
             "A URL da API não foi configurada.");
 
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<SessaoExpiradaHandler>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 

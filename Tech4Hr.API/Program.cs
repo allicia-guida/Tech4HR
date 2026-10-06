@@ -64,6 +64,26 @@ builder.Services
     {
         options.MapInboundClaims = false;
 
+        // Depois de validar a assinatura e a validade do token, confere no
+        // banco se a conta continua ativa. Desativar alguém vale na hora.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async contexto =>
+            {
+                var validador = contexto.HttpContext.RequestServices
+                    .GetRequiredService<ValidadorDeConta>();
+
+                var motivo = await validador.VerificarAsync(
+                    contexto.Principal!,
+                    contexto.HttpContext.RequestAborted);
+
+                if (motivo is not null)
+                {
+                    contexto.Fail(motivo);
+                }
+            }
+        };
+
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
@@ -114,6 +134,8 @@ builder.Services.AddAuthorization(options =>
 // Relógio do ponto: sempre o horário de Brasília, vindo do servidor.
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<RelogioBrasil>();
+
+builder.Services.AddScoped<ValidadorDeConta>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

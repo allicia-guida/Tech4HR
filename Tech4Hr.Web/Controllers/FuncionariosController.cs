@@ -24,6 +24,12 @@ public class FuncionariosController : Controller
             || string.Equals(nivel, "OPERACIONAL", StringComparison.OrdinalIgnoreCase);
     }
 
+    private bool UsuarioEhAdmin()
+    {
+        var nivel = HttpContext.Session.GetString("UsuarioNivel");
+        return string.Equals(nivel, "ADMIN", StringComparison.OrdinalIgnoreCase);
+    }
+
     private bool UsuarioLogado()
     {
         return !string.IsNullOrWhiteSpace(HttpContext.Session.GetString("AuthToken"));
@@ -287,9 +293,11 @@ public class FuncionariosController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        if (!UsuarioEhAdminOuOperacional())
+        // Ativar e desativar é função exclusiva do ADMIN. O botão já some para
+        // o operacional na lista, mas a rota também precisa recusar o POST.
+        if (!UsuarioEhAdmin())
         {
-            TempData["Erro"] = "Acesso restrito a administradores e operacionais.";
+            TempData["Erro"] = "Somente administradores podem ativar ou desativar funcionários.";
             return RedirectToAction("Index", "Dashboard");
         }
 

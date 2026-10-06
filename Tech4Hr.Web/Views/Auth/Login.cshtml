@@ -42,6 +42,11 @@
                  class="validation-message">
             </div>
 
+            @if (TempData["Erro"] is string avisoErro)
+            {
+                <div class="validation-message" role="alert">@avisoErro</div>
+            }
+
             <div class="login-switch" role="tablist" aria-label="Tipo de login">
                 <button type="button"
                         class="login-option active"
