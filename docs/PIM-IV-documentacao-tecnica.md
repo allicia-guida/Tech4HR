@@ -67,7 +67,7 @@ Rotas da API e quem as acessa:
 
 ## 3. Controle de versão
 
-O trabalho foi feito na branch `feature/ajustes-leandro` (a partir da `dev`) para a API, o Web e o banco, e na branch `feature/app-leandro` (a partir da `feature/app`) para o aplicativo. Cada etapa virou um commit separado, na ordem das seções 4 a 8, para facilitar a revisão. A integração com a `dev` segue o fluxo de Pull Request já adotado pela equipe.
+O trabalho foi feito na branch `feature/ajustes-leandro` (a partir da `dev`) para a API, o Web e o banco, e na branch `feature/app-leandro` (a partir da `feature/app`) para o aplicativo. Cada etapa virou um commit separado, na ordem das seções 4 a 8, para facilitar a revisão. As melhorias complementares (limite de tentativas de login, integração contínua e remoção do Bootstrap) ficaram em commits próprios depois deles. A integração com a `dev` segue o fluxo de Pull Request já adotado pela equipe.
 
 ## 4. Horário do ponto
 
@@ -172,7 +172,7 @@ O CSS foi reescrito com abordagem mobile first e variáveis de design (cores, es
 | Formulários | Botão de mostrar senha, proteção contra clique duplo, avisos que somem sozinhos |
 | Instalação | Manifesto web e ícones, para adicionar o site à tela inicial do celular |
 
-Também foram corrigidos três problemas: a validação de formulário no navegador não rodava porque o jQuery não era carregado antes dos scripts de validação, a rota inicial mostrava a página padrão do projeto, e o login voltava sempre para a aba "Funcionário" depois de um erro.
+Também foram corrigidos três problemas: a validação de formulário no navegador não rodava porque o jQuery não era carregado antes dos scripts de validação, a rota inicial mostrava a página padrão do projeto, e o login voltava sempre para a aba "Funcionário" depois de um erro. O Bootstrap, que o site não usava, foi removido de `wwwroot/lib` (ficaram o jQuery e as bibliotecas de validação de formulário).
 
 ## 8. Aplicativo móvel
 
@@ -219,6 +219,9 @@ A API precisa de permissão de leitura e escrita nas tabelas e de `EXECUTE` na p
 - Sessão do Web com cookie `HttpOnly` e expiração por inatividade de 30 minutos.
 - Conta desativada ou com perfil alterado perde o acesso na próxima requisição.
 - Mensagens de login não revelam se o e-mail existe.
+- Limite de tentativas de login por conta: cinco senhas erradas em dez minutos bloqueiam o e-mail por dez minutos. Durante o bloqueio a API responde 429 com o tempo de espera, mesmo que a senha certa chegue, e o Web e o aplicativo mostram essa mensagem. Os valores ficam em `Seguranca:Login` (`MaxFalhas`, `JanelaMinutos` e `BloqueioMinutos`).
+
+O limite é por conta e não por IP porque o Web chama a API de servidor para servidor: a API enxergaria um único IP para todos os usuários, que dividiriam o mesmo limite. E-mails que não existem também contam, para o bloqueio não revelar quais contas existem. Os contadores ficam na memória da API, então reiniciar a API zera tudo e, com mais de uma instância, cada uma conta por conta própria. Como o bloqueio é por conta, quem conhece o e-mail de outra pessoa pode mantê-la bloqueada errando a senha de propósito. Por isso o bloqueio é curto.
 
 ## 11. Testes e verificação
 
@@ -226,7 +229,7 @@ A API precisa de permissão de leitura e escrita nas tabelas e de `EXECUTE` na p
 
 | Projeto | Resultado |
 |---|---|
-| API e Web (`dotnet test Tech4Hr.slnx`) | 52 testes aprovados, 0 falhas |
+| API e Web (`dotnet test Tech4Hr.slnx`) | 66 testes aprovados, 0 falhas |
 | Aplicativo (`npm test`, vitest) | 50 testes aprovados, 0 falhas |
 
 Cobertura principal dos testes da API e do Web:
@@ -236,15 +239,20 @@ Cobertura principal dos testes da API e do Web:
 | `PontoHorarioTests` | Fuso de Brasília com relógio fixo, virada de dia, ordem das batidas, endpoint `hoje` |
 | `DesativacaoTests` | Somente ADMIN desativa, conta desativada é recusada, 401 leva ao login com aviso |
 | `OperacionalTests` | Login do operacional, permissões, bloqueio de criação de OPERACIONAL em `Usuario`, payload com nível e admissão |
+| `LimiteDeLoginTests` | Bloqueio por tentativas, expiração do bloqueio, janela de tempo, zeragem no sucesso, contas independentes, e a mensagem do 429 no Web |
 | `AuthAuthorizationTests` e `UsuariosControllerTests` | Regras de autorização existentes |
+
+### 11.2 Integração contínua
+
+O repositório tem um workflow do GitHub Actions (`.github/workflows/ci.yml`) que compila a solução e roda os testes em Linux e em Windows a cada push na `main`, na `dev` e nas branches `feature/*`, e em todo Pull Request para a `main` e a `dev`. O aplicativo tem o seu (`.github/workflows/mobile.yml`, na branch `feature/app`), que confere tipos, lint e testes quando algo da pasta `mobile` muda.
 
 No aplicativo, além dos testes, foram executados `typecheck` e `lint` sem erros.
 
-### 11.2 Verificação manual
+### 11.3 Verificação manual
 
 O Web foi executado e navegado com uma API simulada que reproduz o contrato real. Foram verificados: login dos três perfis, registro de ponto, desativação com diálogo de confirmação, conta desativada voltando ao login, e ausência de rolagem horizontal em 375, 768, 1100, 1280 e 1440 px, além dos modos escuro e para daltonismo. O aplicativo foi testado com o código real contra a mesma API simulada (login, histórico, hora oficial, registro, mensagem 409 e 401), com o computador em UTC já no dia seguinte, e exibiu o dia e a hora corretos de Brasília.
 
-### 11.3 O que os testes não provam
+### 11.4 O que os testes não provam
 
 - Os testes automatizados usam banco em memória, que não executa a procedure `sp_RegistrarPonto`. O comportamento real da procedure só se confirma contra o SQL Server.
 - A API real contra o Azure SQL e o aplicativo em celular ou emulador dependem de acessos e aparelhos que não estavam disponíveis ao fim desta etapa.
@@ -254,9 +262,7 @@ O Web foi executado e navegado com uma API simulada que reproduz o contrato real
 - Turno que cruza a meia-noite: a procedure exige ENTRADA como primeira batida do dia, então uma saída de madrugada do turno anterior é recusada.
 - `GET /api/pontos/meus-pontos` devolve o histórico inteiro. Convém paginar.
 - A API não guarda a localização da batida nem oferece recuperação de senha, e o aplicativo foi preparado para ambos.
-- Não há limite de tentativas de login.
-- A solução não tem pipeline de integração contínua.
-- A pasta `Tech4Hr.Web/wwwroot/lib/bootstrap` não é mais usada pelo site e pode ser removida por decisão da equipe.
+- O limite de tentativas de login guarda os contadores na memória da API. Para várias instâncias com contagem compartilhada, seria preciso um armazenamento comum, como um cache distribuído.
 - A `Tech4Hr.PublicApi` usa .NET 8, que sai de suporte em novembro de 2026, e existem duas APIs com contratos diferentes. Vale unificá-las.
 - Testes de integração contra um SQL Server de teste dariam cobertura real da procedure.
 

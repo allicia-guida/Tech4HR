@@ -144,6 +144,7 @@ Regras de permissão:
 - Somente o `ADMIN` ativa e desativa funcionários e usuários, e somente ele define se um funcionário é `OPERACIONAL`.
 - O nível de acesso do funcionário fica na coluna `Funcionario.NivelAcesso` (`FUNCIONARIO` ou `OPERACIONAL`). A tabela `Usuario` guarda apenas administradores.
 - Desativar uma conta vale na hora: a API confere no banco, a cada requisição, se a conta do token continua ativa e com o mesmo perfil. Uma sessão aberta cai no próximo clique.
+- O login tem limite de tentativas por conta: cinco senhas erradas em dez minutos bloqueiam aquele e-mail por dez minutos, e a API responde `429` com o tempo de espera, mesmo que a senha certa chegue. Os valores podem ser ajustados em `Seguranca:Login` (`MaxFalhas`, `JanelaMinutos`, `BloqueioMinutos`). Os contadores ficam na memória da API.
 
 As senhas são armazenadas utilizando hash e não são mantidas em texto puro.
 
@@ -245,6 +246,8 @@ Para validar a compilação completa da solução:
 ```bash
 dotnet build Tech4Hr.slnx
 ```
+
+O workflow `.github/workflows/ci.yml` compila e roda esses testes em Linux e em Windows a cada push na `main`, na `dev` e nas branches `feature/*`, e em todo Pull Request para a `main` e a `dev`.
 
 ## Fluxo de desenvolvimento
 
