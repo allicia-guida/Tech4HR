@@ -10,7 +10,7 @@ O **Tech4Hr** disponibiliza uma aplicação Web para gerenciamento de funcionár
 
 - Autenticação com JWT
 - Perfis de acesso `ADMIN` e `OPERACIONAL`
-- Dashboard administrativo
+- Dashboard administrativo com resumo e gráficos (situação de hoje, equipe e expedientes dos últimos 14 dias)
 - Cadastro, consulta e edição de funcionários
 - Ativação e desativação de funcionários conforme permissões
 - Gerenciamento de usuários administrativos
@@ -35,6 +35,8 @@ O **Tech4Hr** disponibiliza uma aplicação Web para gerenciamento de funcionár
 ## Acessibilidade
 
 O projeto possui recursos de acessibilidade visual, incluindo opção de alteração das cores da interface para melhorar a utilização por pessoas com daltonismo.
+
+O botão com um olho no cabeçalho liga o modo para daltônicos: fundo creme, azul e laranja da paleta Okabe e Ito, links sublinhados e listras nas séries dos gráficos. A escolha fica lembrada no navegador.
 
 A aplicação também foi desenvolvida com layouts responsivos para desktop, tablet e dispositivos móveis.
 

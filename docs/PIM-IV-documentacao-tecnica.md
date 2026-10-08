@@ -168,12 +168,28 @@ O CSS foi reescrito com abordagem mobile first e variáveis de design (cores, es
 | Tabelas | Abaixo de 768 px cada linha vira um cartão, com o rótulo de cada coluna (`data-label`). Entre 768 e 1099 px as colunas de CPF e admissão saem da tabela para ela caber sem rolagem |
 | Rolagem | `scroll-behavior: smooth`, desligada quando o sistema pede movimento reduzido |
 | Tema escuro | Segue a preferência do sistema automaticamente |
-| Daltonismo | O botão "Daltonismo" no cabeçalho ativa uma paleta segura (Okabe e Ito), lembrada no navegador. A situação ativo ou inativo também se distingue pelo formato do marcador, e não só pela cor |
-| Ícones | Ícones SVG em um único arquivo parcial, usados só na barra de abas do celular e em poucos controles. Botões e ações de tabela usam texto |
+| Daltonismo | O botão com um olho, no cabeçalho, liga um modo que muda bem a aparência: fundo creme, azul e laranja da paleta Okabe e Ito no lugar do par verde e vermelho, links sempre sublinhados, faixa marcada sob o cabeçalho e listras nas séries dos gráficos. A escolha fica lembrada no navegador. A situação ativo ou inativo também se distingue pelo formato do marcador, e não só pela cor |
+| Ícones | Ícones SVG em um único arquivo parcial, usados na barra de abas do celular, no olho do modo para daltônicos e em poucos controles. Botões e ações de tabela usam texto |
+| Gráficos do painel | Três gráficos feitos só com HTML e CSS (sem biblioteca): situação de hoje, equipe e expedientes dos últimos 14 dias. Cada um tem legenda com os valores e uma tabela de dados como alternativa |
+| Botão de editar | Amarelo em todas as telas e em todos os temas, com texto escuro (contraste de pelo menos 10:1) |
 | Confirmações | Caixa de diálogo própria (`<dialog>`) no lugar do `confirm()` do navegador |
 | Formulários | Botão de mostrar senha, proteção contra clique duplo, avisos que somem sozinhos |
 | Impressão | Folha de estilo própria: a consulta de pontos imprime sem cabeçalho, filtros nem botões |
 | Instalação | Manifesto web e ícones, para adicionar o site à tela inicial do celular |
+
+### Gráficos do painel
+
+O painel mostra, além do resumo em listas, três gráficos calculados a partir do que a API já devolve (lista de funcionários e consulta de pontos dos últimos 14 dias):
+
+| Gráfico | O que mostra |
+|---|---|
+| Situação de hoje | Onde cada funcionário ativo está no dia: trabalhando, em almoço, jornada encerrada ou sem registro. Funcionário inativo não conta |
+| Equipe | Funcionários ativos e inativos |
+| Expedientes dos últimos 14 dias | Em cada dia, quantos funcionários iniciaram o expediente, separados em jornada completa (com saída) e em aberto (sem saída). Em dias passados, "em aberto" costuma indicar batida esquecida |
+
+As contas ficam em código puro (`GraficosDoPainel`), coberto por testes, e o "hoje" é o dia de Brasília (`DiaDeBrasilia`), não o do servidor Web. Se a consulta de pontos falhar, o resumo continua na tela e só os gráficos de ponto dão lugar a um aviso.
+
+As cores seguem uma paleta categórica validada por script (separação para os tipos comuns de daltonismo, faixa de luminosidade e contraste), em passos próprios para o tema claro e para o escuro. Como alguns tons ficam abaixo de 3:1 contra o fundo claro, cada série tem legenda com o valor em texto e há uma tabela de dados em cada gráfico. No modo para daltônicos e na impressão as séries ganham listras, para não dependerem só da cor.
 
 Também foram corrigidos três problemas: a validação de formulário no navegador não rodava porque o jQuery não era carregado antes dos scripts de validação, a rota inicial mostrava a página padrão do projeto, e o login voltava sempre para a aba "Funcionário" depois de um erro. O Bootstrap, que o site não usava, foi removido de `wwwroot/lib` (ficaram o jQuery e as bibliotecas de validação de formulário).
 
@@ -214,6 +230,16 @@ Tabelas: `Usuario`, `Funcionario`, `Ponto` (espelho diário) e `RegistroPonto` (
 
 A API precisa de permissão de leitura e escrita nas tabelas e de `EXECUTE` na procedure `sp_RegistrarPonto`. Quem executa o script `04` precisa de permissão para alterar a tabela `Funcionario`.
 
+### 9.3 Situação em 07/10/2026
+
+A verificação foi feita só com leitura e, depois, com um roteiro de ponta a ponta contra o Azure SQL:
+
+- A coluna `NivelAcesso` e a regra de valores já existem: o script 04 foi aplicado pela equipe.
+- A conta de desenvolvimento recebeu `EXECUTE` e `VIEW DEFINITION` na procedure. A procedure do banco é igual à do repositório (comparação sem comentários e espaços).
+- Uma batida real feita às 23h de Brasília, quando o banco em UTC já estava no dia seguinte, caiu no espelho do dia correto.
+- O roteiro de ponta a ponta teve 48 verificações na API real e 29 no Web, todas aprovadas. Ele criou contas de teste (um ADMIN, funcionários comuns e operacionais), exercitou login, permissões, as quatro batidas na ordem, os erros 409, a desativação com efeito imediato, o rebaixamento de perfil e o limite de tentativas de login (429), e depois apagou tudo o que criou. O banco voltou ao estado de antes, com os mesmos identificadores em todas as tabelas.
+- Ainda falta recadastrar os operacionais antigos, reduzir ao mínimo a permissão da conta de desenvolvimento e trocar a senha dela.
+
 ## 10. Segurança
 
 - Autenticação por JWT, com validação de emissor, público, assinatura e validade, sem tolerância de relógio.
@@ -232,7 +258,7 @@ O limite é por conta e não por IP porque o Web chama a API de servidor para se
 
 | Projeto | Resultado |
 |---|---|
-| API e Web (`dotnet test Tech4Hr.slnx`) | 66 testes aprovados, 0 falhas |
+| API e Web (`dotnet test Tech4Hr.slnx`) | 84 testes aprovados, 0 falhas |
 | Aplicativo (`npm test`, vitest) | 50 testes aprovados, 0 falhas |
 
 Cobertura principal dos testes da API e do Web:
@@ -243,6 +269,7 @@ Cobertura principal dos testes da API e do Web:
 | `DesativacaoTests` | Somente ADMIN desativa, conta desativada é recusada, 401 leva ao login com aviso |
 | `OperacionalTests` | Login do operacional, permissões, bloqueio de criação de OPERACIONAL em `Usuario`, payload com nível e admissão |
 | `LimiteDeLoginTests` | Bloqueio por tentativas, expiração do bloqueio, janela de tempo, zeragem no sucesso, contas independentes, e a mensagem do 429 no Web |
+| `GraficosDoPainelTests` | Contas dos gráficos do painel (situação de hoje, equipe, expedientes por dia, topo do eixo) e o dia de Brasília na virada de dia |
 | `AuthAuthorizationTests` e `UsuariosControllerTests` | Regras de autorização existentes |
 
 ### 11.2 Integração contínua
@@ -251,14 +278,18 @@ O repositório tem um workflow do GitHub Actions (`.github/workflows/ci.yml`) qu
 
 No aplicativo, além dos testes, foram executados `typecheck` e `lint` sem erros.
 
-### 11.3 Verificação manual
+### 11.3 Verificação manual e ponta a ponta
+
+Além da navegação com a API simulada, o sistema foi exercitado contra a API real e o Azure SQL por um roteiro de 77 verificações (48 na API e 29 no Web), todas aprovadas. As contas de teste foram criadas com nome iniciado em "ZZ Teste", com senhas geradas na hora e guardadas só em arquivo local, e removidas no fim, com conferência do banco contra uma foto tirada antes.
+
+Navegação com a API simulada:
 
 O Web foi executado e navegado com uma API simulada que reproduz o contrato real. Foram verificados: login dos três perfis, registro de ponto, desativação com diálogo de confirmação, conta desativada voltando ao login, e ausência de rolagem horizontal em 375, 768, 1100, 1280 e 1440 px, além dos modos escuro e para daltonismo. O aplicativo foi testado com o código real contra a mesma API simulada (login, histórico, hora oficial, registro, mensagem 409 e 401), com o computador em UTC já no dia seguinte, e exibiu o dia e a hora corretos de Brasília.
 
 ### 11.4 O que os testes não provam
 
-- Os testes automatizados usam banco em memória, que não executa a procedure `sp_RegistrarPonto`. O comportamento real da procedure só se confirma contra o SQL Server.
-- A API real contra o Azure SQL e o aplicativo em celular ou emulador dependem de acessos e aparelhos que não estavam disponíveis ao fim desta etapa.
+- Os testes automatizados usam banco em memória, que não executa a procedure `sp_RegistrarPonto`. A procedure real foi confirmada pelo roteiro de ponta a ponta contra o Azure SQL, que hoje é manual.
+- O aplicativo ainda não foi exercitado em um celular ou emulador.
 
 ## 12. Limitações conhecidas e trabalhos futuros
 
@@ -267,7 +298,7 @@ O Web foi executado e navegado com uma API simulada que reproduz o contrato real
 - A API não guarda a localização da batida nem oferece recuperação de senha, e o aplicativo foi preparado para ambos.
 - O limite de tentativas de login guarda os contadores na memória da API. Para várias instâncias com contagem compartilhada, seria preciso um armazenamento comum, como um cache distribuído.
 - A `Tech4Hr.PublicApi` usa .NET 8, que sai de suporte em novembro de 2026, e existem duas APIs com contratos diferentes. Vale unificá-las.
-- Testes de integração contra um SQL Server de teste dariam cobertura real da procedure.
+- O roteiro de ponta a ponta contra o banco real foi feito com scripts guardados fora do repositório. Transformá-lo em testes de integração automáticos, contra um SQL Server de teste, evitaria depender de uma pessoa para repeti-lo.
 
 ## 13. Como executar
 
