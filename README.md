@@ -169,7 +169,7 @@ A interface foi desenvolvida para diferentes tamanhos de tela, incluindo:
 
 A área de registro de ponto do funcionário possui uma interface especialmente adaptada para utilização em dispositivos móveis.
 
-No celular e no tablet a navegação fica em uma barra de abas fixa na parte de baixo da tela, e as tabelas viram cartões empilhados. No desktop o menu é lateral. A rolagem é suave (respeitando a opção "reduzir movimento" do sistema), o tema escuro segue o sistema e o botão de contraste da barra superior ativa uma paleta segura para daltonismo. O site traz um manifesto web e ícones, então pode ser instalado na tela inicial do celular.
+No celular a navegação fica em uma barra de abas fixa na parte de baixo da tela, e as tabelas viram cartões empilhados. A partir de 768 px o menu sobe para o cabeçalho, só com texto, e as tabelas ganham o espaço todo. A rolagem é suave (respeitando a opção "reduzir movimento" do sistema), o tema escuro segue o sistema e o botão de contraste da barra superior ativa uma paleta segura para daltonismo. O site traz um manifesto web e ícones, então pode ser instalado na tela inicial do celular.
 
 ## Como executar
 

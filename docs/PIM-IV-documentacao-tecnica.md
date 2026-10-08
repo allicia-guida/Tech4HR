@@ -67,7 +67,9 @@ Rotas da API e quem as acessa:
 
 ## 3. Controle de versão
 
-O trabalho foi feito na branch `feature/ajustes-leandro` (a partir da `dev`) para a API, o Web e o banco, e na branch `feature/app-leandro` (a partir da `feature/app`) para o aplicativo. Cada etapa virou um commit separado, na ordem das seções 4 a 8, para facilitar a revisão. As melhorias complementares (limite de tentativas de login, integração contínua e remoção do Bootstrap) ficaram em commits próprios depois deles. A integração com a `dev` segue o fluxo de Pull Request já adotado pela equipe.
+O trabalho foi desenvolvido em branches separadas, com um commit por tema, para facilitar a revisão: `feature/ajustes-leandro` (a partir da `dev`) para a API, o Web e o banco, e `feature/app-leandro` (a partir da `feature/app`) para o aplicativo. Cada etapa virou um commit, na ordem das seções 4 a 8. As melhorias complementares (limite de tentativas de login, integração contínua e remoção do Bootstrap) e o visual novo do Web ficaram em commits próprios depois deles.
+
+Em 07/10/2026 o trabalho do Web, da API, do banco, do CI e da documentação foi integrado à `dev` por merge, e o trabalho do aplicativo foi incorporado à `feature/app`, que é a branch dele. As branches temporárias foram apagadas depois da integração, e os commits continuam no histórico da `dev` e da `feature/app`. O aplicativo segue em linha própria: trazê-lo para a `dev` é uma decisão da equipe, por Pull Request.
 
 ## 4. Horário do ponto
 
@@ -158,18 +160,19 @@ O operacional passou a ser um funcionário com permissão extra, e não mais um 
 
 ## 7. Interface web
 
-O CSS foi reescrito com abordagem mobile first e variáveis de design (cores, espaçamentos, raios, sombras).
+O CSS foi reescrito com abordagem mobile first e variáveis de design (cores, espaçamentos, raios). O visual segue uma linha institucional: superfícies planas separadas por linhas finas de 1 px, sem sombras nem degradês, cantos de 4 a 6 px, uma única cor de destaque (azul `#1d4e89`) e texto no lugar de ícones decorativos. A tipografia usa a fonte do sistema (Segoe UI no Windows), então não há dependência de fontes externas.
 
 | Recurso | Como funciona |
 |---|---|
-| Navegação | Menu lateral no desktop (a partir de 1024 px). No celular e no tablet, barra de abas fixa na parte de baixo |
-| Tabelas | Abaixo de 760 px cada linha vira um cartão, com o rótulo de cada coluna (`data-label`) |
+| Navegação | A partir de 768 px, menu em texto dentro do cabeçalho, com o item atual sublinhado. Abaixo disso, barra de abas fixa na parte de baixo, com ícone e texto |
+| Tabelas | Abaixo de 768 px cada linha vira um cartão, com o rótulo de cada coluna (`data-label`). Entre 768 e 1099 px as colunas de CPF e admissão saem da tabela para ela caber sem rolagem |
 | Rolagem | `scroll-behavior: smooth`, desligada quando o sistema pede movimento reduzido |
 | Tema escuro | Segue a preferência do sistema automaticamente |
-| Daltonismo | Botão de contraste na barra superior ativa uma paleta segura (Okabe e Ito), lembrada no navegador |
-| Ícones | Conjunto de ícones SVG em um único arquivo parcial, sem dependência externa |
+| Daltonismo | O botão "Daltonismo" no cabeçalho ativa uma paleta segura (Okabe e Ito), lembrada no navegador. A situação ativo ou inativo também se distingue pelo formato do marcador, e não só pela cor |
+| Ícones | Ícones SVG em um único arquivo parcial, usados só na barra de abas do celular e em poucos controles. Botões e ações de tabela usam texto |
 | Confirmações | Caixa de diálogo própria (`<dialog>`) no lugar do `confirm()` do navegador |
 | Formulários | Botão de mostrar senha, proteção contra clique duplo, avisos que somem sozinhos |
+| Impressão | Folha de estilo própria: a consulta de pontos imprime sem cabeçalho, filtros nem botões |
 | Instalação | Manifesto web e ícones, para adicionar o site à tela inicial do celular |
 
 Também foram corrigidos três problemas: a validação de formulário no navegador não rodava porque o jQuery não era carregado antes dos scripts de validação, a rota inicial mostrava a página padrão do projeto, e o login voltava sempre para a aba "Funcionário" depois de um erro. O Bootstrap, que o site não usava, foi removido de `wwwroot/lib` (ficaram o jQuery e as bibliotecas de validação de formulário).
