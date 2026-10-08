@@ -1,14 +1,19 @@
 @model IReadOnlyList<Tech4Hr.Web.Models.FuncionarioApiResponse>
 
 @{
-    ViewData["Title"] = "Dados dos funcionários";
+    ViewData["Title"] = "Funcionários";
+
+    var ehAdmin = string.Equals(
+        Context.Session.GetString("UsuarioNivel"),
+        "ADMIN",
+        StringComparison.OrdinalIgnoreCase);
 }
 
 <section class="page-section">
 
     <div class="page-header">
         <div>
-            <h2>Funcionários cadastrados</h2>
+            <h1>Funcionários cadastrados</h1>
             <p>
                 Consulte e gerencie os dados dos funcionários cadastrados no sistema.
             </p>
@@ -17,20 +22,20 @@
         <a asp-controller="Funcionarios"
            asp-action="Cadastrar"
            class="btn-primary">
-            + Cadastrar funcionário
+            Cadastrar funcionário
         </a>
     </div>
 
     @if (TempData["Sucesso"] is not null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success" role="status">
             @TempData["Sucesso"]
         </div>
     }
 
     @if (TempData["Erro"] is not null)
     {
-        <div class="alert-error">
+        <div class="alert alert-error" role="alert">
             @TempData["Erro"]
         </div>
     }
@@ -41,6 +46,7 @@
             <input type="search"
                    id="buscaFuncionario"
                    placeholder="Buscar funcionário..."
+                   aria-label="Buscar funcionário"
                    class="search-input" />
 
             <select id="filtroStatusFuncionario" class="search-input" aria-label="Filtrar por status">
@@ -67,8 +73,9 @@
                         <tr>
                             <th>Funcionário</th>
                             <th>E-mail</th>
-                            <th>CPF</th>
-                            <th>Admissão</th>
+                            <th class="col-secundaria">CPF</th>
+                            <th class="col-secundaria">Admissão</th>
+                            <th>Perfil</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -80,68 +87,68 @@
                         {
                             <tr data-status="@(funcionario.Ativo ? "ativo" : "inativo")">
 
-                                <td>
-                                    <strong>
-                                        @funcionario.NomeCompleto
-                                    </strong>
+                                <td class="cell-title" data-label="Funcionário">
+                                    <strong>@funcionario.NomeCompleto</strong>
                                 </td>
 
-                                <td>
-                                    @funcionario.EmailCorporativo
-                                </td>
+                                <td data-label="E-mail">@funcionario.EmailCorporativo</td>
 
-                                <td>
-                                    @funcionario.CPF
-                                </td>
+                                <td class="col-secundaria" data-label="CPF">@funcionario.CPF</td>
 
-                                <td>
+                                <td class="col-secundaria" data-label="Admissão">
                                     @funcionario.DataAdmissao.ToString("dd/MM/yyyy")
                                 </td>
 
-                                <td>
+                                <td data-label="Perfil">
+                                    @(funcionario.EhOperacional ? "Operacional" : "Funcionário")
+                                </td>
+
+                                <td data-label="Status">
                                     @if (funcionario.Ativo)
                                     {
-                                        <span class="status-badge status-active">
-                                            Ativo
-                                        </span>
+                                        <span class="status-badge status-active">Ativo</span>
                                     }
                                     else
                                     {
-                                        <span class="status-badge status-inactive">
-                                            Inativo
-                                        </span>
+                                        <span class="status-badge status-inactive">Inativo</span>
                                     }
                                 </td>
 
-                                <td>
+                                <td class="cell-actions" data-label="Ações">
                                     <div class="table-actions">
 
                                         <a asp-controller="Funcionarios"
-                                            asp-action="Detalhes"
-                                            asp-route-id="@funcionario.IdFuncionario"
-                                            class="btn-action btn-action-view">
-                                              Visualizar
+                                           asp-action="Detalhes"
+                                           asp-route-id="@funcionario.IdFuncionario"
+                                           class="btn-action btn-action-view"
+                                           title="Visualizar">
+                                            <span class="btn-action-label">Visualizar</span>
                                         </a>
 
                                         <a asp-controller="Funcionarios"
                                            asp-action="Editar"
                                            asp-route-id="@funcionario.IdFuncionario"
-                                           class="btn-action btn-action-secondary">
-                                            Editar
+                                           class="btn-action btn-action-secondary"
+                                           title="Editar">
+                                            <span class="btn-action-label">Editar</span>
                                         </a>
 
-                                        @if (Context.Session.GetString("UsuarioNivel") == "ADMIN")
+                                        @if (ehAdmin)
                                         {
                                             <form asp-controller="Funcionarios"
                                                   asp-action="AlterarStatus"
-                                                  method="post">
+                                                  method="post"
+                                                  data-confirm-title="@(funcionario.Ativo ? "Desativar funcionário?" : "Ativar funcionário?")"
+                                                  data-confirm="@(funcionario.Ativo ? $"{funcionario.NomeCompleto} perde o acesso ao sistema até ser ativado novamente." : $"{funcionario.NomeCompleto} volta a ter acesso ao sistema.")"
+                                                  data-confirm-ok="@(funcionario.Ativo ? "Desativar" : "Ativar")"
+                                                  data-confirm-danger="@(funcionario.Ativo ? "true" : "false")">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@funcionario.IdFuncionario" />
                                                 <input type="hidden" name="ativo" value="@(!funcionario.Ativo)" />
                                                 <button type="submit"
                                                         class="btn-action @(funcionario.Ativo ? "btn-action-danger" : "btn-action-secondary")"
-                                                        onclick="return confirm('Tem certeza que deseja seguir com a ação?');">
-                                                    @(funcionario.Ativo ? "Desativar" : "Ativar")
+                                                        title="@(funcionario.Ativo ? "Desativar" : "Ativar")">
+                                                    <span class="btn-action-label">@(funcionario.Ativo ? "Desativar" : "Ativar")</span>
                                                 </button>
                                             </form>
                                         }

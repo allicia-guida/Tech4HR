@@ -15,6 +15,9 @@ public class Funcionario
 
     public string CPF { get; set; } = string.Empty;
 
+    /// <summary>FUNCIONARIO ou OPERACIONAL. O operacional também gere funcionários e consulta pontos.</summary>
+    public string NivelAcesso { get; set; } = "FUNCIONARIO";
+
     public ICollection<Ponto> Pontos { get; set; }
         = new List<Ponto>();
 

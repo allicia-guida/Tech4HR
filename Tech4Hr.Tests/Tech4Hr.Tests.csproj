@@ -23,5 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tech4Hr.API\Tech4Hr.API.csproj" />
+    <ProjectReference Include="..\Tech4Hr.Web\Tech4Hr.Web.csproj" />
   </ItemGroup>
 </Project>

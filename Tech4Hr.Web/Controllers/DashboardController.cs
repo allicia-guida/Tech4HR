@@ -43,7 +43,10 @@ public class DashboardController : Controller
             var model = new DashboardViewModel
             {
                 TotalFuncionarios = funcionarios.Count,
-                FuncionariosAtivos = funcionarios.Count(f => f.Ativo)
+                FuncionariosAtivos = funcionarios.Count(f => f.Ativo),
+
+                // Operacional agora é funcionário com nível OPERACIONAL.
+                TotalOperacionais = funcionarios.Count(f => f.EhOperacional)
             };
 
             if (ehAdmin)
@@ -56,7 +59,6 @@ public class DashboardController : Controller
                 model.TotalUsuarios = usuarios.Count;
                 model.UsuariosAtivos = usuarios.Count(u => u.Ativo);
                 model.TotalAdministradores = usuarios.Count(u => u.NivelUsuario == "ADMIN");
-                model.TotalOperacionais = usuarios.Count(u => u.NivelUsuario == "OPERACIONAL");
             }
 
             return View(model);

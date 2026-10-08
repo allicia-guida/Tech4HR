@@ -84,6 +84,9 @@ public sealed class FuncionarioAuthApiFuncionarioResponse
 
     [JsonPropertyName("ativo")]
     public bool Ativo { get; set; }
+
+    [JsonPropertyName("nivelAcesso")]
+    public string NivelAcesso { get; set; } = "FUNCIONARIO";
 }
 
 public sealed class AuthenticatedUser
@@ -102,6 +105,10 @@ public sealed class FuncionarioAuthenticatedUser
     public string Sobrenome { get; set; } = string.Empty;
     public string EmailCorporativo { get; set; } = string.Empty;
     public bool Ativo { get; set; }
+    public string NivelAcesso { get; set; } = "FUNCIONARIO";
+
+    public bool EhOperacional =>
+        string.Equals(NivelAcesso, "OPERACIONAL", StringComparison.OrdinalIgnoreCase);
 }
 
 public sealed class AuthLoginResult

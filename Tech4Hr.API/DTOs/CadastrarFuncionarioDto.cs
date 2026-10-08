@@ -28,4 +28,9 @@ public class CadastrarFuncionarioDto
 
     [Required(ErrorMessage = "A data de admissão é obrigatória.")]
     public DateTime? DataAdmissao { get; set; }
+
+    /// <summary>Opcional. Vazio vale FUNCIONARIO. Só um ADMIN pode cadastrar OPERACIONAL.</summary>
+    [RegularExpression("^(FUNCIONARIO|OPERACIONAL)?$",
+        ErrorMessage = "Nível de acesso inválido.")]
+    public string? NivelAcesso { get; set; }
 }

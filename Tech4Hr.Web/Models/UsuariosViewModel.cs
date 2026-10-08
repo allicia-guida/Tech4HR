@@ -47,7 +47,8 @@ public sealed class UsuarioCadastroInputModel
     public string Senha { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "O nível do usuário é obrigatório.")]
-    [RegularExpression("^(ADMIN|OPERACIONAL)$", ErrorMessage = "Nível inválido.")]
+    [RegularExpression("^ADMIN$",
+        ErrorMessage = "Nível inválido. Operacionais são cadastrados como funcionários.")]
     public string NivelUsuario { get; set; } = string.Empty;
 }
 

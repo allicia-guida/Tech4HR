@@ -24,6 +24,12 @@ public class FuncionariosController : Controller
             || string.Equals(nivel, "OPERACIONAL", StringComparison.OrdinalIgnoreCase);
     }
 
+    private bool UsuarioEhAdmin()
+    {
+        var nivel = HttpContext.Session.GetString("UsuarioNivel");
+        return string.Equals(nivel, "ADMIN", StringComparison.OrdinalIgnoreCase);
+    }
+
     private bool UsuarioLogado()
     {
         return !string.IsNullOrWhiteSpace(HttpContext.Session.GetString("AuthToken"));
@@ -149,6 +155,14 @@ public class FuncionariosController : Controller
             return RedirectToAction("Index", "Dashboard");
         }
 
+        // Só o ADMIN escolhe o nível. Para o operacional, o cadastro sempre
+        // sai como FUNCIONARIO, mesmo que o formulário tenha sido adulterado.
+        if (!UsuarioEhAdmin())
+        {
+            model.NivelAcesso = "FUNCIONARIO";
+            ModelState.Remove(nameof(model.NivelAcesso));
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -222,7 +236,8 @@ public class FuncionariosController : Controller
             Sobrenome = funcionario.Sobrenome,
             EmailCorporativo = funcionario.EmailCorporativo,
             CPF = funcionario.CPF,
-            DataAdmissao = funcionario.DataAdmissao
+            DataAdmissao = funcionario.DataAdmissao,
+            NivelAcesso = funcionario.NivelAcesso
         };
 
         return View(model);
@@ -245,6 +260,13 @@ public class FuncionariosController : Controller
         if (id <= 0)
         {
             return NotFound();
+        }
+
+        // Só o ADMIN altera o nível. Para o operacional, nulo mantém o atual.
+        if (!UsuarioEhAdmin())
+        {
+            model.NivelAcesso = null;
+            ModelState.Remove(nameof(model.NivelAcesso));
         }
 
         if (!ModelState.IsValid)
@@ -287,9 +309,11 @@ public class FuncionariosController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        if (!UsuarioEhAdminOuOperacional())
+        // Ativar e desativar é função exclusiva do ADMIN. O botão já some para
+        // o operacional na lista, mas a rota também precisa recusar o POST.
+        if (!UsuarioEhAdmin())
         {
-            TempData["Erro"] = "Acesso restrito a administradores e operacionais.";
+            TempData["Erro"] = "Somente administradores podem ativar ou desativar funcionários.";
             return RedirectToAction("Index", "Dashboard");
         }
 

@@ -62,6 +62,10 @@ public class Tech4HrDbContext : DbContext
 
             entity.HasIndex(f => f.CPF)
                 .IsUnique();
+
+            entity.Property(f => f.NivelAcesso)
+                .HasColumnType("varchar(20)")
+                .IsRequired();
         });
 
         // USUARIO

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Tech4Hr.API.Data;
 using Tech4Hr.API.DTOs;
 using Tech4Hr.API.Models;
+using Tech4Hr.API.Services;
 
 namespace Tech4Hr.API.Controllers;
 
@@ -15,10 +16,59 @@ namespace Tech4Hr.API.Controllers;
 public class PontosController : ControllerBase
 {
     private readonly Tech4HrDbContext _context;
+    private readonly RelogioBrasil _relogio;
 
-    public PontosController(Tech4HrDbContext context)
+    public PontosController(Tech4HrDbContext context, RelogioBrasil relogio)
     {
         _context = context;
+        _relogio = relogio;
+    }
+
+    private bool TentarObterIdFuncionario(out int idFuncionario)
+    {
+        var claim = User.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.Sub)
+            ?.Value;
+
+        return int.TryParse(claim, out idFuncionario);
+    }
+
+    [Authorize(Policy = "FuncionarioPolicy")]
+    [HttpGet("hoje")]
+    public async Task<IActionResult> Hoje()
+    {
+        if (!TentarObterIdFuncionario(out var idFuncionario))
+        {
+            return Unauthorized();
+        }
+
+        var agora = _relogio.Agora;
+        var hoje = _relogio.Hoje.ToDateTime(TimeOnly.MinValue);
+
+        var ponto = await _context.Pontos
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p =>
+                p.IdFuncionario == idFuncionario &&
+                p.DataPonto == hoje);
+
+        return Ok(new PontoHojeResponse
+        {
+            DataReferencia = _relogio.Hoje,
+            Agora = agora,
+            FusoHorario = _relogio.NomeDoFuso,
+            ProximoTipoRegistro = JornadaPonto.ProximoTipo(ponto),
+            Ponto = ponto is null
+                ? null
+                : new PontoDoDiaResponse
+                {
+                    IdPonto = ponto.IdPonto,
+                    DataPonto = ponto.DataPonto,
+                    Entrada = ponto.Entrada,
+                    SaidaAlmoco = ponto.SaidaAlmoco,
+                    EntradaAlmoco = ponto.EntradaAlmoco,
+                    Saida = ponto.Saida
+                }
+        });
     }
 
     [Authorize(Policy = "FuncionarioPolicy")]
@@ -36,11 +86,7 @@ public class PontosController : ControllerBase
             return Forbid();
         }
 
-        var idFuncionarioClaim = User.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.Sub)
-            ?.Value;
-
-        if (!int.TryParse(idFuncionarioClaim, out var idFuncionario))
+        if (!TentarObterIdFuncionario(out var idFuncionario))
         {
             return Unauthorized();
         }
@@ -79,13 +125,19 @@ public class PontosController : ControllerBase
             {
                 registro.IdPonto,
                 registro.TipoRegistro,
-                registro.DataHora,
+                DataHora = _relogio.ParaBrasil(registro.DataHora),
                 registro.Mensagem
             });
         }
-        catch (DbUpdateException ex)
+        catch (SqlException ex) when (JornadaPonto.MensagemDeRegra(ex.Number) is not null)
         {
-            return BadRequest(ex.InnerException?.Message ?? "Não foi possível registrar o ponto.");
+            // Erro de regra lançado pela procedure (THROW 50001 a 50003).
+            return Conflict(JornadaPonto.MensagemDeRegra(ex.Number));
+        }
+        catch (SqlException ex) when (ex.Number is 2601 or 2627)
+        {
+            // Duas batidas do mesmo tipo no mesmo dia (índice único).
+            return Conflict("Esta marcação já foi registrada hoje.");
         }
         catch (Exception)
         {
@@ -99,11 +151,7 @@ public class PontosController : ControllerBase
         [FromQuery] DateTime? dataInicio,
         [FromQuery] DateTime? dataFim)
     {
-        var idFuncionarioClaim = User.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.Sub)
-            ?.Value;
-
-        if (!int.TryParse(idFuncionarioClaim, out var idFuncionario))
+        if (!TentarObterIdFuncionario(out var idFuncionario))
         {
             return Unauthorized();
         }

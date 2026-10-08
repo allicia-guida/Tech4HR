@@ -15,9 +15,14 @@ CREATE TABLE dbo.Funcionario (
     DataAdmissao DATE NOT NULL,
     Ativo BIT NOT NULL DEFAULT 1,
     CPF CHAR(11) NOT NULL,
+    NivelAcesso VARCHAR(20) NOT NULL
+        CONSTRAINT DF_Funcionario_NivelAcesso DEFAULT 'FUNCIONARIO',
 
     CONSTRAINT PK_Funcionario
         PRIMARY KEY (IdFuncionario),
+
+    CONSTRAINT CK_Funcionario_NivelAcesso
+        CHECK (NivelAcesso IN ('FUNCIONARIO', 'OPERACIONAL')),
 
     CONSTRAINT UQ_Funcionario_Email
         UNIQUE (EmailCorporativo),

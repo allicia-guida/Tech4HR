@@ -3,12 +3,8 @@
 @{
     ViewData["Title"] = "Dados do funcionário";
 
-    static string FormatarHorario(DateTime? horario)
-    {
-        return horario.HasValue
-            ? horario.Value.ToString("HH:mm")
-            : "-";
-    }
+    static string FormatarHorario(DateTime? horario) =>
+        horario.HasValue ? horario.Value.ToString("HH:mm") : "-";
 }
 
 <section class="page-section">
@@ -19,10 +15,11 @@
             <a asp-controller="Funcionarios"
                asp-action="Index"
                class="back-link">
-                ← Voltar para funcionários
+                <svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg>
+                Voltar para funcionários
             </a>
 
-            <h2>@Model.Funcionario.NomeCompleto</h2>
+            <h1>@Model.Funcionario.NomeCompleto</h1>
 
             <p>
                 Consulte os dados cadastrais e os registros
@@ -43,30 +40,25 @@
 
         <div class="employee-details-header">
 
-            <div>
-                <span class="details-label">
-                    Funcionário
-                </span>
-
-                <h3>@Model.Funcionario.NomeCompleto</h3>
-            </div>
+            <h2>Dados cadastrais</h2>
 
             @if (Model.Funcionario.Ativo)
             {
-                <span class="status-badge status-active">
-                    Ativo
-                </span>
+                <span class="status-badge status-active">Ativo</span>
             }
             else
             {
-                <span class="status-badge status-inactive">
-                    Inativo
-                </span>
+                <span class="status-badge status-inactive">Inativo</span>
             }
 
         </div>
 
         <div class="employee-details-grid">
+
+            <div class="detail-item">
+                <span>Perfil</span>
+                <strong>@(Model.Funcionario.EhOperacional ? "Operacional" : "Funcionário")</strong>
+            </div>
 
             <div class="detail-item">
                 <span>E-mail corporativo</span>
@@ -96,13 +88,7 @@
 
     <div class="employee-points-section">
 
-        <div>
-            <span class="details-label">
-                Registros
-            </span>
-
-            <h3>Pontos registrados</h3>
-        </div>
+        <h2>Pontos registrados</h2>
 
         @if (Model.Pontos.Count == 0)
         {
@@ -127,21 +113,11 @@
                         @foreach (var ponto in Model.Pontos)
                         {
                             <tr>
-                                <td>
-                                    @ponto.DataPonto.ToString("dd/MM/yyyy")
-                                </td>
-                                <td>
-                                    @FormatarHorario(ponto.Entrada)
-                                </td>
-                                <td>
-                                    @FormatarHorario(ponto.SaidaAlmoco)
-                                </td>
-                                <td>
-                                    @FormatarHorario(ponto.EntradaAlmoco)
-                                </td>
-                                <td>
-                                    @FormatarHorario(ponto.Saida)
-                                </td>
+                                <td class="cell-title" data-label="Data"><strong>@ponto.DataPonto.ToString("dd/MM/yyyy")</strong></td>
+                                <td data-label="Entrada">@FormatarHorario(ponto.Entrada)</td>
+                                <td data-label="Saída almoço">@FormatarHorario(ponto.SaidaAlmoco)</td>
+                                <td data-label="Retorno almoço">@FormatarHorario(ponto.EntradaAlmoco)</td>
+                                <td data-label="Saída">@FormatarHorario(ponto.Saida)</td>
                             </tr>
                         }
                     </tbody>

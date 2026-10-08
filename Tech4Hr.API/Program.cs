@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tech4Hr.API.Configurations;
 using Tech4Hr.API.Data;
+using Tech4Hr.API.Services;
 using Tech4Hr.API.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +64,26 @@ builder.Services
     {
         options.MapInboundClaims = false;
 
+        // Depois de validar a assinatura e a validade do token, confere no
+        // banco se a conta continua ativa. Desativar alguém vale na hora.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async contexto =>
+            {
+                var validador = contexto.HttpContext.RequestServices
+                    .GetRequiredService<ValidadorDeConta>();
+
+                var motivo = await validador.VerificarAsync(
+                    contexto.Principal!,
+                    contexto.HttpContext.RequestAborted);
+
+                if (motivo is not null)
+                {
+                    contexto.Fail(motivo);
+                }
+            }
+        };
+
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
@@ -108,6 +129,25 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim("tipo_conta", "USUARIO");
         policy.RequireRole("ADMIN");
     });
+});
+
+// Relógio do ponto: sempre o horário de Brasília, vindo do servidor.
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<RelogioBrasil>();
+
+builder.Services.AddScoped<ValidadorDeConta>();
+
+// Limite de tentativas de login por conta. Os valores podem ser ajustados em
+// Seguranca:Login (MaxFalhas, JanelaMinutos, BloqueioMinutos).
+builder.Services.AddSingleton(provider =>
+{
+    var configuracao = provider.GetRequiredService<IConfiguration>();
+
+    return new LimiteDeTentativasDeLogin(
+        provider.GetRequiredService<TimeProvider>(),
+        configuracao.GetValue("Seguranca:Login:MaxFalhas", 5),
+        TimeSpan.FromMinutes(configuracao.GetValue("Seguranca:Login:JanelaMinutos", 10)),
+        TimeSpan.FromMinutes(configuracao.GetValue("Seguranca:Login:BloqueioMinutos", 10)));
 });
 
 builder.Services.AddControllers();

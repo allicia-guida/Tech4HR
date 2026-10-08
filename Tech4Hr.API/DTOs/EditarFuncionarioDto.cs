@@ -24,4 +24,9 @@ public class EditarFuncionarioDto
 
     [Required(ErrorMessage = "A data de admissão é obrigatória.")]
     public DateTime? DataAdmissao { get; set; }
+
+    /// <summary>Opcional. Vazio mantém o nível atual. Só um ADMIN pode alterar.</summary>
+    [RegularExpression("^(FUNCIONARIO|OPERACIONAL)?$",
+        ErrorMessage = "Nível de acesso inválido.")]
+    public string? NivelAcesso { get; set; }
 }

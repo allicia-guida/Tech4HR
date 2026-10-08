@@ -25,6 +25,9 @@ public class AuthController : Controller
         LoginViewModel model,
         CancellationToken cancellationToken)
     {
+        // Em caso de erro a tela volta na aba "Administrador".
+        ViewData["Fluxo"] = "administrativo";
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -121,6 +124,23 @@ public class AuthController : Controller
         HttpContext.Session.SetString(
             "FuncionarioEmail",
             resultado.User.EmailCorporativo);
+
+        // O operacional é um funcionário com permissão extra: usa o mesmo token
+        // para bater ponto e para as telas de gestão, que leem AuthToken e
+        // UsuarioNivel. O ADMIN continua entrando só pelo login administrativo.
+        if (resultado.User.EhOperacional)
+        {
+            HttpContext.Session.SetString("AuthToken", resultado.Token);
+            HttpContext.Session.SetString("UsuarioNivel", "OPERACIONAL");
+
+            HttpContext.Session.SetString(
+                "UsuarioNome",
+                $"{resultado.User.Nome} {resultado.User.Sobrenome}".Trim());
+
+            HttpContext.Session.SetString(
+                "UsuarioEmail",
+                resultado.User.EmailCorporativo);
+        }
 
         return RedirectToAction("Index", "MeuPonto");
     }
