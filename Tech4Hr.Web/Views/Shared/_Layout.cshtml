@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b1f3a" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c23" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
     <meta name="description" content="Tech4Hr: gestão de funcionários e controle de ponto." />
 
@@ -16,7 +17,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Tech4Hr" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <link rel="stylesheet"
           href="~/css/tech4hr.css"
@@ -38,11 +39,9 @@
 
     <partial name="_Icons" />
 
-    <partial name="_Sidebar" />
-
     <div class="app-shell">
 
-        <partial name="_Topbar" />
+        <partial name="_Cabecalho" />
 
         <main id="conteudo" class="content-area">
             @RenderBody()

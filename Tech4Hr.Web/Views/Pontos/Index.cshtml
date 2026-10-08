@@ -11,7 +11,7 @@
 
     <div class="page-header">
         <div>
-            <h2>Pontos registrados</h2>
+            <h1>Pontos registrados</h1>
             <p>
                 Consulte os registros de ponto e aplique filtros por funcionário e período.
             </p>
@@ -67,7 +67,6 @@
             <div class="filter-actions filter-actions-bottom">
                 <button type="submit"
                         class="btn-primary">
-                    <svg class="icon" aria-hidden="true"><use href="#i-filter" /></svg>
                     Filtrar
                 </button>
 
@@ -87,7 +86,6 @@
                         class="btn-secondary btn-export-xml"
                         form="form-filtros-pontos"
                         formaction="@Url.Action("ExportarXml", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
-                    <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
                     Exportar XML
                 </button>
 
@@ -95,7 +93,6 @@
                         class="btn-secondary btn-export-xlsx"
                         form="form-filtros-pontos"
                         formaction="@Url.Action("ExportarXlsx", "Pontos", new { idFuncionario = Model.IdFuncionario, dataInicio = Model.DataInicio?.ToString("yyyy-MM-dd"), dataFim = Model.DataFim?.ToString("yyyy-MM-dd") })">
-                    <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
                     Exportar XLSX
                 </button>
             </div>

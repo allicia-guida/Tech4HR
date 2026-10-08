@@ -19,7 +19,7 @@
                 Voltar para funcionários
             </a>
 
-            <h2>@Model.Funcionario.NomeCompleto</h2>
+            <h1>@Model.Funcionario.NomeCompleto</h1>
 
             <p>
                 Consulte os dados cadastrais e os registros
@@ -31,7 +31,6 @@
            asp-action="Editar"
            asp-route-id="@Model.Funcionario.IdFuncionario"
            class="btn-primary">
-            <svg class="icon" aria-hidden="true"><use href="#i-edit" /></svg>
             Editar dados
         </a>
 
@@ -41,13 +40,7 @@
 
         <div class="employee-details-header">
 
-            <div>
-                <span class="details-label">
-                    @(Model.Funcionario.EhOperacional ? "Operacional" : "Funcionário")
-                </span>
-
-                <h3>@Model.Funcionario.NomeCompleto</h3>
-            </div>
+            <h2>Dados cadastrais</h2>
 
             @if (Model.Funcionario.Ativo)
             {
@@ -61,6 +54,11 @@
         </div>
 
         <div class="employee-details-grid">
+
+            <div class="detail-item">
+                <span>Perfil</span>
+                <strong>@(Model.Funcionario.EhOperacional ? "Operacional" : "Funcionário")</strong>
+            </div>
 
             <div class="detail-item">
                 <span>E-mail corporativo</span>
@@ -90,13 +88,7 @@
 
     <div class="employee-points-section">
 
-        <div>
-            <span class="details-label">
-                Registros
-            </span>
-
-            <h3>Pontos registrados</h3>
-        </div>
+        <h2>Pontos registrados</h2>
 
         @if (Model.Pontos.Count == 0)
         {

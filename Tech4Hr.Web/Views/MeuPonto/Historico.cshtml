@@ -10,13 +10,9 @@
 <div class="funcionario-page funcionario-page-wide funcionario-historico-page">
 
     <div class="funcionario-header">
-        <div>
-            <p class="eyebrow">Histórico</p>
-            <h2>Meu histórico</h2>
-        </div>
+        <h1>Meu histórico</h1>
         <a asp-controller="MeuPonto" asp-action="Index" class="btn-secondary compact">
-            <svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg>
-            Voltar
+            Voltar para meu ponto
         </a>
     </div>
 
@@ -36,7 +32,6 @@
                 <input type="date" id="dataFim" name="dataFim" value="@(Model.DataFim.HasValue ? Model.DataFim.Value.ToString("yyyy-MM-dd") : string.Empty)" />
             </div>
             <button type="submit" class="btn-primary history-submit">
-                <svg class="icon" aria-hidden="true"><use href="#i-filter" /></svg>
                 Filtrar
             </button>
         </form>

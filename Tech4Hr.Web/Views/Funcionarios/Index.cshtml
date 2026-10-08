@@ -13,7 +13,7 @@
 
     <div class="page-header">
         <div>
-            <h2>Funcionários cadastrados</h2>
+            <h1>Funcionários cadastrados</h1>
             <p>
                 Consulte e gerencie os dados dos funcionários cadastrados no sistema.
             </p>
@@ -22,7 +22,6 @@
         <a asp-controller="Funcionarios"
            asp-action="Cadastrar"
            class="btn-primary">
-            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
             Cadastrar funcionário
         </a>
     </div>
@@ -123,7 +122,6 @@
                                            asp-route-id="@funcionario.IdFuncionario"
                                            class="btn-action btn-action-view"
                                            title="Visualizar">
-                                            <svg class="icon" aria-hidden="true"><use href="#i-eye" /></svg>
                                             <span class="btn-action-label">Visualizar</span>
                                         </a>
 
@@ -132,7 +130,6 @@
                                            asp-route-id="@funcionario.IdFuncionario"
                                            class="btn-action btn-action-secondary"
                                            title="Editar">
-                                            <svg class="icon" aria-hidden="true"><use href="#i-edit" /></svg>
                                             <span class="btn-action-label">Editar</span>
                                         </a>
 
@@ -151,7 +148,6 @@
                                                 <button type="submit"
                                                         class="btn-action @(funcionario.Ativo ? "btn-action-danger" : "btn-action-secondary")"
                                                         title="@(funcionario.Ativo ? "Desativar" : "Ativar")">
-                                                    <svg class="icon" aria-hidden="true"><use href="#i-power" /></svg>
                                                     <span class="btn-action-label">@(funcionario.Ativo ? "Desativar" : "Ativar")</span>
                                                 </button>
                                             </form>

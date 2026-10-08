@@ -41,6 +41,8 @@
 
 <div class="funcionario-page funcionario-clock-page">
 
+    <h1 class="sr-only">Meu ponto</h1>
+
     <div class="clock-card">
 
         <div>
@@ -79,7 +81,6 @@
                     id="btnRegistrarPonto"
                     data-loading-text="Registrando..."
                     disabled="@(Model.PodeRegistrarPonto ? null : "disabled")">
-                <svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg>
                 @textoBotao
             </button>
         </form>
@@ -107,7 +108,6 @@
             <a asp-controller="MeuPonto"
                asp-action="Historico"
                class="btn-historico">
-                <svg class="icon" aria-hidden="true"><use href="#i-history" /></svg>
                 Ver meu histórico
             </a>
         </div>

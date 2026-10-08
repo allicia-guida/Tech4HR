@@ -1,7 +1,7 @@
 @model Tech4Hr.Web.Models.DashboardViewModel
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Painel";
 
     var ehAdmin = string.Equals(
         Context.Session.GetString("UsuarioNivel"),
@@ -20,55 +20,69 @@
 
     <div class="page-header">
         <div>
-            <h2>@(ehAdmin ? "Visão geral administrativa" : "Resumo operacional")</h2>
+            <h1>@(ehAdmin ? "Visão geral administrativa" : "Resumo operacional")</h1>
             <p>@(ehAdmin ? "Resumo do sistema Tech4Hr." : "Dados gerais da operação e da equipe.")</p>
         </div>
 
         <div class="filter-actions">
             <a asp-controller="Pontos" asp-action="Index" class="btn-secondary">
-                <svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg>
                 Ver pontos
             </a>
             <a asp-controller="Funcionarios" asp-action="Cadastrar" class="btn-primary">
-                <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
                 Cadastrar funcionário
             </a>
         </div>
     </div>
 
-    <div class="employee-details-grid">
-        <div class="detail-item">
-            <span>Total de funcionários</span>
-            <strong>@Model.TotalFuncionarios</strong>
-        </div>
+    <div class="summary-grid">
 
-        <div class="detail-item">
-            <span>Funcionários ativos</span>
-            <strong>@Model.FuncionariosAtivos</strong>
-        </div>
+        <section class="summary-card" aria-labelledby="resumoFuncionarios">
+            <div class="summary-card-header">
+                <h2 id="resumoFuncionarios">Funcionários</h2>
+                <a asp-controller="Funcionarios" asp-action="Index">Ver lista</a>
+            </div>
 
-        <div class="detail-item">
-            <span>Operacionais</span>
-            <strong>@Model.TotalOperacionais</strong>
-        </div>
+            <dl class="summary-list">
+                <div class="summary-row">
+                    <dt>Cadastrados</dt>
+                    <dd>@Model.TotalFuncionarios</dd>
+                </div>
+                <div class="summary-row">
+                    <dt>Ativos</dt>
+                    <dd>@Model.FuncionariosAtivos</dd>
+                </div>
+                <div class="summary-row">
+                    <dt>Operacionais</dt>
+                    <dd>@Model.TotalOperacionais</dd>
+                </div>
+            </dl>
+        </section>
 
         @if (ehAdmin)
         {
-            <div class="detail-item">
-                <span>Total de usuários</span>
-                <strong>@Model.TotalUsuarios</strong>
-            </div>
+            <section class="summary-card" aria-labelledby="resumoUsuarios">
+                <div class="summary-card-header">
+                    <h2 id="resumoUsuarios">Usuários administrativos</h2>
+                    <a asp-controller="Usuarios" asp-action="Index">Ver lista</a>
+                </div>
 
-            <div class="detail-item">
-                <span>Usuários ativos</span>
-                <strong>@Model.UsuariosAtivos</strong>
-            </div>
-
-            <div class="detail-item">
-                <span>Administradores</span>
-                <strong>@Model.TotalAdministradores</strong>
-            </div>
+                <dl class="summary-list">
+                    <div class="summary-row">
+                        <dt>Cadastrados</dt>
+                        <dd>@Model.TotalUsuarios</dd>
+                    </div>
+                    <div class="summary-row">
+                        <dt>Ativos</dt>
+                        <dd>@Model.UsuariosAtivos</dd>
+                    </div>
+                    <div class="summary-row">
+                        <dt>Administradores</dt>
+                        <dd>@Model.TotalAdministradores</dd>
+                    </div>
+                </dl>
+            </section>
         }
+
     </div>
 
 </section>
