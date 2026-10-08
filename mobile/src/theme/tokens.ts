@@ -16,34 +16,34 @@ export type ThemeColors = {
 // A paleta é a mesma do site (Tech4Hr.Web, wwwroot/css/tech4hr.css), para o
 // aplicativo e o site parecerem um produto só.
 export const lightColors: ThemeColors = {
-  background: "#F3F6FB",
+  background: "#F5F6F8",
   surface: "#FFFFFF",
-  surfaceSecondary: "#F1F5F9",
-  text: "#0F172A",
-  textSecondary: "#64748B",
-  border: "#E2E8F0",
-  primary: "#2563EB",
-  primaryPressed: "#1D4ED8",
-  success: "#15803D",
-  danger: "#B91C1C",
+  surfaceSecondary: "#EEF0F4",
+  text: "#14181F",
+  textSecondary: "#566070",
+  border: "#D9DDE3",
+  primary: "#1D4E89",
+  primaryPressed: "#163F70",
+  success: "#1B6B3A",
+  danger: "#B3261E",
   onPrimary: "#FFFFFF",
-  overlay: "rgba(15,23,42,0.48)",
+  overlay: "rgba(20,24,31,0.5)",
 };
 
 export const darkColors: ThemeColors = {
-  background: "#0B1220",
-  surface: "#111B2E",
-  surfaceSecondary: "#0F1829",
-  text: "#E6EDF7",
-  textSecondary: "#93A4BD",
-  border: "#223049",
-  primary: "#60A5FA",
-  primaryPressed: "#93C5FD",
-  success: "#4ADE80",
-  danger: "#F87171",
+  background: "#0F1318",
+  surface: "#171C23",
+  surfaceSecondary: "#1F262F",
+  text: "#E7EAEE",
+  textSecondary: "#9AA4B2",
+  border: "#2B333E",
+  primary: "#7FB0E6",
+  primaryPressed: "#A0C4EE",
+  success: "#6CC08A",
+  danger: "#F0857D",
   // Texto escuro sobre o azul claro do tema escuro, para manter o contraste.
-  onPrimary: "#0B1220",
-  overlay: "rgba(0,0,0,0.64)",
+  onPrimary: "#0F1318",
+  overlay: "rgba(0,0,0,0.6)",
 };
 
 export const spacing = {
@@ -55,4 +55,4 @@ export const spacing = {
   xxl: 24,
   xxxl: 32,
 } as const;
-export const radius = { input: 8, button: 8, card: 8, modal: 12 } as const;
+export const radius = { input: 4, button: 4, card: 6, modal: 6 } as const;
