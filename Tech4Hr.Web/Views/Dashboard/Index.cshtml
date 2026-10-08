@@ -85,4 +85,33 @@
 
     </div>
 
+    @if (Model.Graficos is { } graficos)
+    {
+        <section class="charts-grid" aria-labelledby="titulo-graficos">
+
+            <h2 id="titulo-graficos" class="sr-only">Gráficos</h2>
+
+            @if (graficos.Hoje is not null)
+            {
+                <partial name="_GraficoBarra" model="graficos.Hoje" />
+            }
+
+            @if (graficos.Equipe is not null)
+            {
+                <partial name="_GraficoBarra" model="graficos.Equipe" />
+            }
+
+            @if (graficos.Dias is not null)
+            {
+                <partial name="_GraficoColunas" model="graficos.Dias" />
+            }
+
+            @if (graficos.Aviso is not null)
+            {
+                <div class="alert alert-error chart-aviso" role="status">@graficos.Aviso</div>
+            }
+
+        </section>
+    }
+
 </section>

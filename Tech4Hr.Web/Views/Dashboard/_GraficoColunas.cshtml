@@ -1,0 +1,113 @@
+@using System.Globalization
+@model Tech4Hr.Web.Models.GraficoColunas
+
+@{
+    var ptBr = new CultureInfo("pt-BR");
+    var maximo = Model.Maximo;
+
+    string Altura(int valor) =>
+        maximo == 0
+            ? "0"
+            : (100.0 * valor / maximo).ToString("0.##", CultureInfo.InvariantCulture);
+}
+
+<figure class="chart-card chart-wide" id="@Model.Id">
+
+    <figcaption class="chart-title">
+        @Model.Titulo
+        @if (!string.IsNullOrWhiteSpace(Model.Subtitulo))
+        {
+            <span class="chart-sub">@Model.Subtitulo</span>
+        }
+    </figcaption>
+
+    <ul class="chart-legend chart-legend-inline">
+        <li>
+            <span class="swatch serie-1" aria-hidden="true"></span>
+            <span class="legend-label">Jornada completa</span>
+            <span class="legend-value"><strong>@Model.TotalCompletas</strong></span>
+        </li>
+        <li>
+            <span class="swatch serie-2" aria-hidden="true"></span>
+            <span class="legend-label">Em aberto (sem saída)</span>
+            <span class="legend-value"><strong>@Model.TotalEmAberto</strong></span>
+        </li>
+    </ul>
+
+    <div class="columns" role="img" aria-label="@Model.Resumo">
+
+        <div class="columns-axis" aria-hidden="true">
+            <span>@maximo</span>
+            <span>@(maximo / 2)</span>
+            <span>0</span>
+        </div>
+
+        <div class="columns-area">
+
+            <div class="columns-grid" aria-hidden="true">
+                <i></i><i></i><i></i>
+            </div>
+
+            <div class="columns-plot">
+                @foreach (var dia in Model.Dias)
+                {
+                    var ehHoje = Model.Hoje == dia.Data;
+
+                    <div class="col@(ehHoje ? " col-hoje" : "")"
+                         title="@dia.Data.ToString("dd/MM", ptBr): @dia.Completas completa(s), @dia.EmAberto em aberto">
+                        @if (dia.Total > 0)
+                        {
+                            <span class="col-stack" style="height:@Altura(dia.Total)%">
+                                @if (dia.EmAberto > 0)
+                                {
+                                    <span class="col-seg serie-2" style="flex-grow:@dia.EmAberto"></span>
+                                }
+                                @if (dia.Completas > 0)
+                                {
+                                    <span class="col-seg serie-1" style="flex-grow:@dia.Completas"></span>
+                                }
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="columns-labels" aria-hidden="true">
+                @foreach (var dia in Model.Dias)
+                {
+                    <span class="col-label@(Model.Hoje == dia.Data ? " col-label-hoje" : "")">
+                        <span class="d">@dia.Data.ToString("dd", ptBr)</span><span class="m">/@dia.Data.ToString("MM", ptBr)</span>
+                    </span>
+                }
+            </div>
+
+        </div>
+
+    </div>
+
+    <details class="chart-table">
+        <summary>Ver dados em tabela</summary>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Dia</th>
+                    <th scope="col" class="num">Completas</th>
+                    <th scope="col" class="num">Em aberto</th>
+                    <th scope="col" class="num">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dia in Model.Dias)
+                {
+                    <tr>
+                        <th scope="row">@dia.Data.ToString("dd/MM/yyyy", ptBr)</th>
+                        <td class="num">@dia.Completas</td>
+                        <td class="num">@dia.EmAberto</td>
+                        <td class="num">@dia.Total</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </details>
+
+</figure>

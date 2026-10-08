@@ -23,6 +23,9 @@ builder.Services.AddHttpClient("Tech4HrApi", client =>
 })
 .AddHttpMessageHandler<SessaoExpiradaHandler>();
 
+// Relógio injetável: o painel usa o dia de Brasília e os testes controlam a hora.
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IFuncionarioService, FuncionarioService>();

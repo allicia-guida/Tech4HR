@@ -1,0 +1,71 @@
+@model Tech4Hr.Web.Models.GraficoBarraEmpilhada
+
+@{
+    var total = Model.Total;
+
+    string Percentual(int valor) =>
+        total == 0 ? "0" : Math.Round(100.0 * valor / total).ToString("0");
+}
+
+<figure class="chart-card" id="@Model.Id">
+
+    <figcaption class="chart-title">
+        @Model.Titulo
+        @if (!string.IsNullOrWhiteSpace(Model.Subtitulo))
+        {
+            <span class="chart-sub">@Model.Subtitulo</span>
+        }
+    </figcaption>
+
+    @if (total == 0)
+    {
+        <p class="chart-empty">Sem dados para mostrar.</p>
+    }
+    else
+    {
+        <div class="stack-bar" role="img" aria-label="@Model.Resumo">
+            @foreach (var segmento in Model.Segmentos.Where(s => s.Valor > 0))
+            {
+                <span class="stack-seg serie-@segmento.Serie"
+                      style="flex-grow:@segmento.Valor"
+                      title="@segmento.Rotulo: @segmento.Valor"></span>
+            }
+        </div>
+
+        <ul class="chart-legend">
+            @foreach (var segmento in Model.Segmentos)
+            {
+                <li>
+                    <span class="swatch serie-@segmento.Serie" aria-hidden="true"></span>
+                    <span class="legend-label">@segmento.Rotulo</span>
+                    <span class="legend-value">
+                        <strong>@segmento.Valor</strong>
+                        <span class="legend-pct">(@Percentual(segmento.Valor)%)</span>
+                    </span>
+                </li>
+            }
+        </ul>
+
+        <details class="chart-table">
+            <summary>Ver dados em tabela</summary>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Categoria</th>
+                        <th scope="col" class="num">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var segmento in Model.Segmentos)
+                    {
+                        <tr>
+                            <th scope="row">@segmento.Rotulo</th>
+                            <td class="num">@segmento.Valor</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </details>
+    }
+
+</figure>
