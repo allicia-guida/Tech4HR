@@ -54,6 +54,18 @@
     /* Painel de marca do login */
     --hero: linear-gradient(135deg, #163f70 0%, #1d4e89 100%);
 
+    /* Botão de editar: amarelo, com texto escuro */
+    --edit-bg: #f7c600;
+    --edit-hover: #e3b400;
+    --edit-text: #1f1a00;
+
+    /* Gráficos: paleta categórica validada (ordem fixa) e o cinza de quem não é destaque */
+    --chart-1: #2a78d6;
+    --chart-2: #eb6834;
+    --chart-3: #1baf7a;
+    --chart-4: #eda100;
+    --chart-neutro: #8a94a3;
+
     /* Forma e movimento */
     --radius-sm: 3px;
     --radius: 4px;
@@ -98,43 +110,63 @@
 
         --hero: linear-gradient(135deg, #0f1823 0%, #1d3f66 100%);
 
+        --edit-bg: #f0bf1a;
+        --edit-hover: #ffd23f;
+        --edit-text: #1a1500;
+
+        --chart-1: #3987e5;
+        --chart-2: #d95926;
+        --chart-3: #199e70;
+        --chart-4: #c98500;
+        --chart-neutro: #6b7684;
+
         --shadow-dialog: 0 8px 24px rgb(0 0 0 / 0.5);
         --backdrop: rgb(0 0 0 / 0.6);
     }
 }
 
-/* Modo para daltônicos (botão de contraste no cabeçalho).
-   Troca o par verde/vermelho pelo par azul/vermelhão da paleta Okabe-Ito,
-   que se distingue nos tipos comuns de daltonismo, e usa um fundo de papel
-   com contraste alto. Vem depois do tema escuro para prevalecer sobre ele. */
+/* Modo para daltônicos (botão do olho no cabeçalho).
+   Muda o visual de forma bem perceptível: fundo creme, azul e laranja da paleta
+   Okabe-Ito no lugar do par verde e vermelho, links sempre sublinhados e uma faixa
+   marcada sob o cabeçalho. Vem depois do tema escuro para prevalecer sobre ele. */
 :root.accessibility-daltonic {
     color-scheme: light;
 
-    --bg: #f3efe9;
-    --surface: #fffdf9;
-    --surface-2: #ece6dc;
-    --border: #d6c7b1;
-    --border-strong: #bda98a;
-    --text: #1d1d1d;
-    --text-2: #2d2d2d;
-    --muted: #4a4540;
+    --bg: #faf3e0;
+    --surface: #fffdf6;
+    --surface-2: #f1e7cc;
+    --border: #d8c79a;
+    --border-strong: #b39c5f;
+    --text: #1a1a1a;
+    --text-2: #2b2b2b;
+    --muted: #4b4636;
 
-    --primary: #0b5ed7;
-    --primary-hover: #0844a3;
-    --primary-soft: #dbe8fb;
+    --primary: #0072b2;
+    --primary-hover: #00578a;
+    --primary-soft: #e6f3fb;
     --primary-contrast: #ffffff;
 
-    --success: #00507f;
-    --success-soft: #d6eaf7;
-    --danger: #8f3a00;
-    --danger-soft: #fbe0cc;
-    --warning: #7a5000;
-    --warning-soft: #fbe9c0;
+    --success: #00694d;
+    --success-soft: #d3eee4;
+    --danger: #b04200;
+    --danger-soft: #fbe3d1;
+    --warning: #7a5200;
+    --warning-soft: #fbeab8;
 
-    --hero: linear-gradient(135deg, #1f2a37 0%, #0b4a9e 100%);
+    --hero: linear-gradient(135deg, #003d5c 0%, #0072b2 100%);
 
-    --shadow-dialog: 0 8px 24px rgb(44 35 22 / 0.22);
-    --backdrop: rgb(29 24 16 / 0.5);
+    --edit-bg: #f0e442;
+    --edit-hover: #e0d12e;
+    --edit-text: #1a1a1a;
+
+    --chart-1: #2a78d6;
+    --chart-2: #eb6834;
+    --chart-3: #1baf7a;
+    --chart-4: #eda100;
+    --chart-neutro: #8a8272;
+
+    --shadow-dialog: 0 8px 24px rgb(60 45 10 / 0.25);
+    --backdrop: rgb(40 30 5 / 0.55);
 }
 
 
@@ -336,6 +368,11 @@ button {
     background: var(--surface-2);
 }
 
+.tool-btn .icon {
+    width: 1.375rem;
+    height: 1.375rem;
+}
+
 .tool-btn[aria-pressed="true"] {
     background: var(--primary-soft);
     color: var(--primary);
@@ -495,6 +532,7 @@ button {
 .btn-primary,
 .btn-secondary,
 .btn-danger,
+.btn-edit,
 .btn-login-submit,
 .btn-historico {
     display: inline-flex;
@@ -553,6 +591,17 @@ button {
     filter: brightness(0.92);
 }
 
+/* Editar é sempre amarelo, para ser reconhecido de longe */
+.btn-edit {
+    background: var(--edit-bg);
+    color: var(--edit-text);
+}
+
+.btn-edit:hover {
+    background: var(--edit-hover);
+    text-decoration: none;
+}
+
 button:disabled {
     opacity: 0.55;
     cursor: not-allowed;
@@ -588,6 +637,17 @@ button:disabled {
 .btn-action:hover {
     background: var(--primary-soft);
     text-decoration: none;
+}
+
+/* Nas tabelas o Editar é um botão pequeno e amarelo, ao lado das ações em texto */
+.btn-action.btn-edit {
+    padding: 4px 12px;
+    background: var(--edit-bg);
+    color: var(--edit-text);
+}
+
+.btn-action.btn-edit:hover {
+    background: var(--edit-hover);
 }
 
 .btn-action-danger {
@@ -1185,6 +1245,260 @@ div.validation-message:not(:empty),
     font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Gráficos do painel ---------- */
+
+.charts-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.chart-card {
+    min-width: 0;
+    margin: 0;
+    padding: 16px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.chart-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    margin-bottom: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.chart-sub {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+.chart-empty {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* Cores das séries. O texto nunca usa a cor da série: ela só marca a legenda e o desenho. */
+.serie-1 { background-color: var(--chart-1); }
+.serie-2 { background-color: var(--chart-2); }
+.serie-3 { background-color: var(--chart-3); }
+.serie-4 { background-color: var(--chart-4); }
+.serie-neutro { background-color: var(--chart-neutro); }
+
+.stack-seg,
+.col-seg,
+.swatch {
+    forced-color-adjust: none;
+}
+
+/* Barra empilhada: uma só barra, com 2px de respiro entre os trechos */
+.stack-bar {
+    display: flex;
+    gap: 2px;
+    height: 28px;
+}
+
+.stack-seg {
+    flex-basis: 0;
+    min-width: 4px;
+    border-radius: 3px;
+}
+
+.chart-legend {
+    display: grid;
+    gap: 6px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chart-legend li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.legend-value {
+    font-variant-numeric: tabular-nums;
+}
+
+.legend-pct {
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+.chart-legend-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    margin: 0 0 16px;
+}
+
+.chart-legend-inline li {
+    display: flex;
+}
+
+/* Colunas empilhadas por dia */
+.columns {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    column-gap: 6px;
+}
+
+.columns-axis {
+    position: relative;
+    height: 180px;
+    color: var(--muted);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.columns-axis span {
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.columns-axis span:nth-child(1) { top: 0; }
+.columns-axis span:nth-child(2) { top: 50%; }
+.columns-axis span:nth-child(3) { top: 100%; }
+
+.columns-area {
+    position: relative;
+    min-width: 0;
+}
+
+.columns-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    pointer-events: none;
+}
+
+.columns-grid i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--border);
+}
+
+.columns-grid i:nth-child(1) { top: 0; }
+.columns-grid i:nth-child(2) { top: 50%; }
+.columns-grid i:nth-child(3) { top: 100%; border-top-color: var(--border-strong); }
+
+.columns-plot {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 180px;
+}
+
+.col {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 0;
+    height: 100%;
+}
+
+.col-stack {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 3px 3px 0 0;
+}
+
+.col-seg {
+    min-height: 4px;
+}
+
+.col-seg + .col-seg {
+    margin-top: 2px;
+}
+
+.col:hover .col-stack {
+    opacity: 0.85;
+}
+
+.columns-labels {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.col-label {
+    flex: 1;
+    min-width: 0;
+    color: var(--muted);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.col-label .m {
+    display: none;
+}
+
+.col-label-hoje {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* Tabela de dados: o mesmo conteúdo do gráfico, para leitor de tela, impressão e conferência */
+.chart-table {
+    margin-top: 14px;
+    font-size: 0.875rem;
+}
+
+.chart-table summary {
+    display: inline-block;
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.chart-table table {
+    width: 100%;
+    margin: 8px 0 0;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.chart-table th,
+.chart-table td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+}
+
+.chart-table thead th {
+    color: var(--text-2);
+    font-weight: 600;
+}
+
+.chart-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 /* ---------- Registro de ponto do funcionário ---------- */
 
 .funcionario-page {
@@ -1509,6 +1823,10 @@ div.validation-message:not(:empty),
         border-color: var(--danger);
     }
 
+    .cell-actions .btn-action.btn-edit {
+        border-color: transparent;
+    }
+
     .page-header > .btn-primary,
     .page-header > .filter-actions {
         width: 100%;
@@ -1519,8 +1837,29 @@ div.validation-message:not(:empty),
     }
 }
 
+/* Celular: nas colunas só os dias pares mostram o número, e o de hoje sempre aparece */
+@media (max-width: 639px) {
+    .col-label:nth-child(odd) {
+        visibility: hidden;
+    }
+}
+
+@media (min-width: 640px) {
+    .col-label .m {
+        display: inline;
+    }
+}
+
 /* A partir de 768px: o menu sobe para dentro do cabeçalho */
 @media (min-width: 768px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-wide {
+        grid-column: 1 / -1;
+    }
+
     .app-shell {
         padding-bottom: 32px;
     }
@@ -1579,8 +1918,8 @@ div.validation-message:not(:empty),
         display: inline;
     }
 
-    .header-logout .tool-icon,
-    .tool-btn .tool-icon {
+    /* Só o "Sair" troca o ícone por texto; o olho do modo para daltônicos fica sempre */
+    .header-logout .tool-icon {
         display: none;
     }
 
@@ -1645,6 +1984,7 @@ div.validation-message:not(:empty),
         .btn-primary,
         .btn-secondary,
         .btn-danger,
+        .btn-edit,
         .btn-historico,
         .tool-btn {
             min-height: 38px;
@@ -1797,6 +2137,60 @@ div.validation-message:not(:empty),
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* Modo para daltônicos: reforços que não dependem de cor. Links sempre sublinhados,
+   faixa marcada sob o cabeçalho e padrões nas séries dos gráficos. */
+:root.accessibility-daltonic a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+:root.accessibility-daltonic .nav-link,
+:root.accessibility-daltonic .brand,
+:root.accessibility-daltonic .skip-link,
+:root.accessibility-daltonic .btn-primary,
+:root.accessibility-daltonic .btn-secondary,
+:root.accessibility-daltonic .btn-danger,
+:root.accessibility-daltonic .btn-edit,
+:root.accessibility-daltonic .btn-historico,
+:root.accessibility-daltonic .btn-login-submit {
+    text-decoration: none;
+}
+
+:root.accessibility-daltonic .app-header {
+    border-bottom: 3px solid var(--primary);
+}
+
+:root.accessibility-daltonic .serie-2 {
+    background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.6) 0 2px, transparent 2px 7px);
+}
+
+:root.accessibility-daltonic .serie-3 {
+    background-image: repeating-linear-gradient(45deg, rgb(0 0 0 / 0.35) 0 2px, transparent 2px 7px);
+}
+
+:root.accessibility-daltonic .serie-neutro {
+    background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.55) 0 2px, transparent 2px 6px);
+}
+
+/* Na impressão (muitas vezes em preto e branco) as séries também ganham padrão */
+@media print {
+    .serie-2 {
+        background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.6) 0 2px, transparent 2px 7px);
+    }
+
+    .serie-3 {
+        background-image: repeating-linear-gradient(45deg, rgb(0 0 0 / 0.35) 0 2px, transparent 2px 7px);
+    }
+
+    .serie-neutro {
+        background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.55) 0 2px, transparent 2px 6px);
+    }
+
+    .chart-card {
+        break-inside: avoid;
     }
 }
 
