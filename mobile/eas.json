@@ -12,7 +12,8 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://tech4hr-api-public.onrender.com"
+        "EXPO_PUBLIC_API_TARGET": "tech4hr",
+        "EXPO_PUBLIC_API_URL": "https://tech4hr-api.onrender.com"
       },
       "android": {
         "buildType": "apk"

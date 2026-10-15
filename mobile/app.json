@@ -6,7 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/images/tech4hr-icon.png",
     "scheme": "tech4hr",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/tech4hr-icon.png",
@@ -29,6 +32,12 @@
       "blockedPermissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
+      ],
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "plugins": [
@@ -84,9 +93,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1a355f95-9731-4ca3-9dc1-6011419b3e8c"
+        "projectId": "39e9bc6e-23f1-4b39-b3c2-db4107a9de95"
       }
     },
-    "owner": "matheusmestriner"
+    "owner": "omatoszz"
   }
 }
