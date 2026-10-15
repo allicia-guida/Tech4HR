@@ -1,0 +1,235 @@
+openapi: 3.1.0
+info:
+  title: Tech4HR API
+  version: 1.0.0
+  description: Contrato compatível com o repositório allicia-guida/Tech4HR no commit 505737c.
+servers:
+  - url: https://api.example.com
+security:
+  - bearerAuth: []
+paths:
+  /api/auth/login-funcionario:
+    post:
+      security: []
+      operationId: loginFuncionario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginFuncionario"
+      responses:
+        "200":
+          description: Sessão de funcionário criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessaoFuncionario"
+        "401":
+          description: Credenciais inválidas ou funcionário inativo
+  /api/auth/login:
+    post:
+      security: []
+      operationId: loginUsuarioAdministrativo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, senha]
+              properties:
+                email:
+                  type: string
+                  format: email
+                senha:
+                  type: string
+      responses:
+        "200":
+          description: Sessão administrativa criada
+        "401":
+          description: Credenciais inválidas ou usuário inativo
+  /api/pontos/meus-pontos:
+    get:
+      operationId: listarMeusPontos
+      parameters:
+        - in: query
+          name: dataInicio
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dataFim
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Espelhos de ponto do funcionário autenticado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ponto"
+        "401":
+          description: Sessão ausente ou inválida
+        "403":
+          description: Conta sem perfil de funcionário
+  /api/pontos/registrar:
+    post:
+      operationId: registrarPonto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tipoRegistro
+                - latitude
+                - longitude
+                - precisaoMetros
+                - dataHoraCaptura
+                - localizacaoSimulada
+              properties:
+                tipoRegistro:
+                  $ref: "#/components/schemas/TipoRegistro"
+                latitude:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                longitude:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                precisaoMetros:
+                  type: number
+                  minimum: 0
+                  maximum: 5000
+                dataHoraCaptura:
+                  type: string
+                  format: date-time
+                localizacaoSimulada:
+                  type: boolean
+      responses:
+        "200":
+          description: Ponto registrado com horário do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistroConfirmado"
+        "400":
+          description: Marcação inválida ou fora de sequência
+        "401":
+          description: Sessão ausente ou inválida
+        "403":
+          description: Conta sem perfil de funcionário
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginFuncionario:
+      type: object
+      required: [emailCorporativo, senha]
+      properties:
+        emailCorporativo:
+          type: string
+          format: email
+        senha:
+          type: string
+    SessaoFuncionario:
+      type: object
+      required: [token, tipo, expiraEm, funcionario]
+      properties:
+        token:
+          type: string
+        tipo:
+          type: string
+          const: Bearer
+        expiraEm:
+          type: string
+          format: date-time
+        funcionario:
+          $ref: "#/components/schemas/FuncionarioAutenticado"
+    FuncionarioAutenticado:
+      type: object
+      required: [idFuncionario, nome, sobrenome, emailCorporativo, ativo]
+      properties:
+        idFuncionario:
+          type: integer
+        nome:
+          type: string
+        sobrenome:
+          type: string
+        emailCorporativo:
+          type: string
+          format: email
+        ativo:
+          type: boolean
+    TipoRegistro:
+      type: string
+      enum: [ENTRADA, SAIDA_ALMOCO, ENTRADA_ALMOCO, SAIDA]
+    Ponto:
+      type: object
+      required: [idPonto, dataPonto]
+      properties:
+        idPonto:
+          type: integer
+        dataPonto:
+          type: string
+          format: date
+        entrada:
+          type: [string, "null"]
+          format: date-time
+        saidaAlmoco:
+          type: [string, "null"]
+          format: date-time
+        entradaAlmoco:
+          type: [string, "null"]
+          format: date-time
+        saida:
+          type: [string, "null"]
+          format: date-time
+        localizacoes:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocalizacaoPonto"
+    LocalizacaoPonto:
+      type: object
+      required:
+        - tipoRegistro
+        - latitude
+        - longitude
+        - precisaoMetros
+        - dataHoraCaptura
+      properties:
+        tipoRegistro:
+          $ref: "#/components/schemas/TipoRegistro"
+        latitude:
+          type: number
+        longitude:
+          type: number
+        precisaoMetros:
+          type: number
+        dataHoraCaptura:
+          type: string
+          format: date-time
+    RegistroConfirmado:
+      type: object
+      required: [idPonto, tipoRegistro, dataHora, mensagem, localizacao]
+      properties:
+        idPonto:
+          type: integer
+        tipoRegistro:
+          $ref: "#/components/schemas/TipoRegistro"
+        dataHora:
+          type: string
+          format: date-time
+        mensagem:
+          type: string
+        localizacao:
+          $ref: "#/components/schemas/LocalizacaoPonto"
